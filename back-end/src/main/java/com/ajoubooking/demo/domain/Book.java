@@ -1,5 +1,6 @@
 package com.ajoubooking.demo.domain;
 
+import com.ajoubooking.demo.domain.embed.CallNumber;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,5 +15,7 @@ public class Book {  // 도서관 DB 연동 전까지만 사용될 임시 테이
     private Long id;
 
     private String book_name;
-    private String call_number;
+
+    @Embedded
+    private CallNumber call_number;
 }
