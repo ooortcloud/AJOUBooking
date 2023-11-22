@@ -5,6 +5,7 @@ import lombok.Getter;
 
 /*
     도서관 사이트에 표기되는 형태 : 005.8 B187hK한
+    청구기호 순서 : ㄱㄴㄷ > abc > 123
 */
 
 @Embeddable

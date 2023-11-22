@@ -12,9 +12,11 @@ public class MainService {
         this.mainController = mainController;
     }
 
+    void separateCallNumber() {
 
+    }
 
-    void binarySearch(){
+    void binarySearch() {
 
     }
 }
