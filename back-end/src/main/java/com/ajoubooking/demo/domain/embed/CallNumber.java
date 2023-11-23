@@ -1,5 +1,6 @@
 package com.ajoubooking.demo.domain.embed;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 
@@ -11,8 +12,11 @@ import lombok.Getter;
 @Embeddable
 @Getter
 public class CallNumber {
-    private Float classification_number;  // 808.8
-    private String author_symbol;  // 세14민
-    // private String volume_symbol;  // v.44
-    // private String copy_symbol;  // c.7
+    @Column(name = "classification_number")
+    private Float classificationNumber;  // 분류번호 : 808.8
+
+    @Column(name = "author_symbol")
+    private String authorSymbol;  // 저자기호 : 세14민
+    // private String volumeSymbol;  // 권차기호 : v.44
+    // private String copySymbol;  // 복본기호 : c.7
 }

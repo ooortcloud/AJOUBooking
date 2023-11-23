@@ -16,7 +16,7 @@ public class Bookshelf {
     private Long id;
 
     @Embedded  // 임베디드 타입 선언
-    private CallNumber start_call_number;
+    private CallNumber startCallNumber;
 
     @Embedded  // 임베디드 타입 선언
     private ColumnAddress columnAddress;
