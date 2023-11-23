@@ -2,6 +2,8 @@ package com.ajoubooking.demo.service;
 
 import com.ajoubooking.demo.domain.Bookshelf;
 import com.ajoubooking.demo.dto.CallNumberDto;
+import com.ajoubooking.demo.dto.ColumnAddressResponseDto;
+import com.ajoubooking.demo.dto.SeparatedAuthorSymbolDto;
 import com.ajoubooking.demo.repository.BookshelfRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,11 +46,13 @@ public class MainService {
         return callNumberDto;
     }
 
-    public void binarySearch(CallNumberDto callNumberDto, Float low_num, Float high_num) {
+    public ColumnAddressResponseDto binarySearch(CallNumberDto callNumberDto, Float low_num, Float high_num) {
         Float foundNum = binarySearchForClassification(callNumberDto.getClassificationNumber(), low_num, high_num);
 
         List<Bookshelf> foundAuthorSymbols = bookshelfRepository.findAllByStartCallNumberClassificationNumber(foundNum);
-        String foundSym = binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundAuthorSymbols);
+        ColumnAddressResponseDto answer = binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundAuthorSymbols);
+
+        return answer;
     }
 
     private Float binarySearchForClassification(Float key, Float low, Float high) {
@@ -70,34 +74,56 @@ public class MainService {
         return -1f;
     }
 
-    private String binarySearchForAuthor(String key, List<Bookshelf> list) {
-        int low = 0;
-        int high = list.size() - 1;
-        Integer mid = null;
+    private ColumnAddressResponseDto binarySearchForAuthor(String key, List<Bookshelf> list) {
+        int lowIndex = 0;
+        int highIndex = list.size() - 1;
+        Integer midIndex = null;
 
-        Map<String, Object> separatedAuthorSymbol = separateAuthorSymbol(key);
+        SeparatedAuthorSymbolDto separatedKeyAuthorSymbol = separateAuthorSymbol(key);
+        SeparatedAuthorSymbolDto separatedCompareAuthorSymbol = null;
 
-//        while(low <= high) {
-//            mid = (low + high) / 2;
-//
-//
-//
-//            if()
-//        }
+        /*
+        while(low <= high) {
+            mid = (low + high) / 2;
 
-        return "";
+
+
+            if()
+        }
+         */
+
+
+        return null;
     }
 
-    private Map<String, Object> separateAuthorSymbol(String author_symbol) {
-        int n = author_symbol.length();
-        Character c = null;
+    private SeparatedAuthorSymbolDto separateAuthorSymbol(String authorSymbol) {  // authorSymbol : B187hK한
+        int n = authorSymbol.length();
+        Character c;
 
-        Map<String, Object> temp = new HashMap<>();
-        for (int i = 0; i < n; i++) {
-            c = author_symbol.charAt(i);
+        Character authorInit = authorSymbol.charAt(0);
+        Character bookInit = null;
 
+        int i;
+        String num = "";  // null로 초기화하면, 문자열 합성 시 null이 들어가서 안됨
+        String temp;
+        for (i = 1; i < 4; i++) {
+            c = authorSymbol.charAt(i);
+            temp = c.toString();
+            try {
+                Integer.parseInt(temp);
+            } catch (NumberFormatException e) {
+                break;
+            } finally {
+                num = num + temp;
+            }
         }
 
-        return temp;
+        bookInit = authorSymbol.charAt(i);
+
+        return SeparatedAuthorSymbolDto.builder()
+                .authorInitialConsonant(authorInit)
+                .number(Integer.parseInt(num))
+                .bookInitialConsonant(bookInit)
+                .build();
     }
 }

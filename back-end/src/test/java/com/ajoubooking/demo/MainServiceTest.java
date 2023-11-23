@@ -1,7 +1,10 @@
 package com.ajoubooking.demo;
 
 import com.ajoubooking.demo.dto.CallNumberDto;
+import com.ajoubooking.demo.dto.SeparatedAuthorSymbolDto;
 import com.ajoubooking.demo.service.MainService;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,4 +43,21 @@ public class MainServiceTest {
 
         assertThat(callNumberDto).usingRecursiveComparison().isEqualTo(callNumberDto2);
     }
+
+    /*
+    @Test
+    @DisplayName("저자기호 분리 테스트(public 변경 후 진행할 것)")
+    void separateAuthorSymbolTest() {
+        SeparatedAuthorSymbolDto ans = mainService.separateAuthorSymbol("B187hK한");
+
+        assertThat(ans).usingRecursiveComparison().isEqualTo(
+                SeparatedAuthorSymbolDto.builder()
+                        .authorInitialConsonant('B')
+                        .number(187)
+                        .bookInitialConsonant('h')
+                        .build()
+        );
+    }
+     */
+
 }
