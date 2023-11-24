@@ -1,14 +1,16 @@
 package com.ajoubooking.demo;
 
 import com.ajoubooking.demo.dto.CallNumberDto;
-import com.ajoubooking.demo.dto.SeparatedAuthorSymbolDto;
+import com.ajoubooking.demo.dto.ColumnAddressResponseDto;
 import com.ajoubooking.demo.service.MainService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -26,7 +28,7 @@ public class MainServiceTest {
     void testSeparateRequestCallNumber() {
         CallNumberDto callNumberDto = mainService.separateRequestCallNumber("005.8 B187hK한");
         CallNumberDto callNumberDto2 = CallNumberDto.builder()
-                .classificationNumber(5.8f)
+                .classificationNumber(BigDecimal.valueOf(5.8))
                 .authorSymbol("B187hK한")
                 .build();
 
@@ -37,16 +39,48 @@ public class MainServiceTest {
     void testSeparateRequestCallNumberException() {
         CallNumberDto callNumberDto = mainService.separateRequestCallNumber("일 005.8 B187hK한");
         CallNumberDto callNumberDto2 = CallNumberDto.builder()
-                .classificationNumber(5.8f)
+                .classificationNumber(BigDecimal.valueOf(5.8))
                 .authorSymbol("B187hK한")
                 .build();
 
         assertThat(callNumberDto).usingRecursiveComparison().isEqualTo(callNumberDto2);
     }
 
+    @Test
+    @DisplayName("Service 이진탐색 전체 테스트")  // 값만 비교했을 때 성공
+    void binarySearchForResponseTest() {
+        Optional<ColumnAddressResponseDto> result = mainService.binarySearchForResponse(CallNumberDto.builder()
+                .classificationNumber(BigDecimal.valueOf(5.8))
+                .authorSymbol("B187hK한")
+                .build());
+
+        ColumnAddressResponseDto answer = ColumnAddressResponseDto.builder()
+                .category(0)
+                .bookshelfNum(8)
+                .columnNum(11)
+                .build();
+
+        assertThat(result.get()).usingRecursiveComparison().isEqualTo(answer);
+    }
+
     /*
     @Test
-    @DisplayName("저자기호 분리 테스트(public 변경 후 진행할 것)")
+    @DisplayName("저자 기호 분리 테스트(public 변경 후 진행할 것)")
+    void binarySearchForAuthorTest() {
+        Optional<ColumnAddressResponseDto> result = mainService.binarySearchForAuthor("B187hK한", new ArrayList<>());
+
+        ColumnAddressResponseDto compare = Optional.ofNullable(ColumnAddressResponseDto.builder()
+                                                                        .category(0)
+                                                                        .bookshelfNum(8)
+                                                                        .columnNum(11)
+                                                                        .build());
+        assertThat(result.get()).usingRecursiveComparison().isEqualTo(compare);
+    }
+     */
+
+    /*
+    @Test
+    @DisplayName("저자기호 분리 테스트(public 변경 후 진행할 것)")  // 성공
     void separateAuthorSymbolTest() {
         SeparatedAuthorSymbolDto ans = mainService.separateAuthorSymbol("B187hK한");
 

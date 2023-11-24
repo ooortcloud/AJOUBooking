@@ -13,7 +13,7 @@ public class Bookshelf {
 
     @Id  // 기본키로 설정
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // 기본값을 AUTO_INCREMENT로 설정
-    private Long id;
+    private Long id;  // 자유롭게 접근하지 못하게 private로 선언
 
     @Embedded  // 임베디드 타입 선언
     private CallNumber startCallNumber;

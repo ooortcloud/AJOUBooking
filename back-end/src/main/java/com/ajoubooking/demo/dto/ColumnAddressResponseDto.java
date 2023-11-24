@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
                 @Builder를 사용하면 기본 생성자 생성을 보장함.
             */
 public class ColumnAddressResponseDto {
-    private String category;  // 000
+    private Integer category;  // 0
     private Integer bookshelfNum;  // 1
     private Integer columnNum;  // 2
 }

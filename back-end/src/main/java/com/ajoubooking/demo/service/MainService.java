@@ -1,6 +1,7 @@
 package com.ajoubooking.demo.service;
 
 import com.ajoubooking.demo.domain.Bookshelf;
+import com.ajoubooking.demo.domain.embed.ColumnAddress;
 import com.ajoubooking.demo.dto.CallNumberDto;
 import com.ajoubooking.demo.dto.ColumnAddressResponseDto;
 import com.ajoubooking.demo.dto.SeparatedAuthorSymbolDto;
@@ -8,9 +9,10 @@ import com.ajoubooking.demo.repository.BookshelfRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Transactional  // 프록시 객체를 생성하여 자동 commit, rollback 등의 트랜잭션 처리
@@ -26,72 +28,182 @@ public class MainService {
     public CallNumberDto separateRequestCallNumber(String callNumber) {
         String[] s = callNumber.split(" ");
 
-        int i = 0;
-        Float f = null;
+        BigDecimal bigDecimal = null;
+        CallNumberDto callNumberDto = null;
 
         // 별치기호 예외처리
-        try {
-            f = Float.parseFloat(s[0]);
-        } catch (NumberFormatException e) {
+        int i = 0;
+        if (s.length == 3) {
             i++;
-        } finally {
-            f = Float.parseFloat(s[i]);
         }
-
-        CallNumberDto callNumberDto = CallNumberDto.builder()
-                .classificationNumber(f)
+        bigDecimal = BigDecimal.valueOf(Double.valueOf(s[i]));  // Long은 String 타입 변환 지원 안함
+        callNumberDto = CallNumberDto.builder()
+                .classificationNumber(bigDecimal)
                 .authorSymbol(s[i+1])
                 .build();
 
         return callNumberDto;
     }
 
-    public ColumnAddressResponseDto binarySearch(CallNumberDto callNumberDto, Float low_num, Float high_num) {
-        Float foundNum = binarySearchForClassification(callNumberDto.getClassificationNumber(), low_num, high_num);
+    public Optional<ColumnAddressResponseDto> binarySearchForResponse(CallNumberDto callNumberDto) {
 
-        List<Bookshelf> foundAuthorSymbols = bookshelfRepository.findAllByStartCallNumberClassificationNumber(foundNum);
-        ColumnAddressResponseDto answer = binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundAuthorSymbols);
+        Bookshelf foundRow = bookshelfRepository
+                .findFirstByStartCallNumberClassificationNumberLessThanEqualOrderByStartCallNumberClassificationNumberDesc(callNumberDto.getClassificationNumber());
 
-        return answer;
-    }
+        List<Bookshelf> foundAuthorSymbols = bookshelfRepository.findByStartCallNumberClassificationNumber(
+                foundRow.getStartCallNumber().getClassificationNumber());
 
-    private Float binarySearchForClassification(Float key, Float low, Float high) {
-
-
-        Float mid = null;
-
-        while(low <= high) {
-            mid = (low + high) / 2;
-
-            if(key < mid) {
-                high = mid;
-            } else if (key > mid) {
-                low = mid;
-            } else {
-                return mid;
-            }
+        if (foundAuthorSymbols.size() == 1) {
+            ColumnAddress answer = foundAuthorSymbols.get(0).getColumnAddress();
+            return Optional.of(ColumnAddressResponseDto.builder()
+                    .category(answer.getCategory())
+                    .bookshelfNum(answer.getBookshelfNum())
+                    .columnNum(answer.getColumnNum())
+                    .build());
         }
-        return -1f;
+        else
+            return binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundAuthorSymbols);
     }
 
-    private ColumnAddressResponseDto binarySearchForAuthor(String key, List<Bookshelf> list) {
+    private Optional<ColumnAddressResponseDto> binarySearchForAuthor(String key, List<Bookshelf> foundAuthorSymbols) {
+
         int lowIndex = 0;
-        int highIndex = list.size() - 1;
+        int highIndex = foundAuthorSymbols.size() - 1;
         Integer midIndex = null;
 
-        SeparatedAuthorSymbolDto separatedKeyAuthorSymbol = separateAuthorSymbol(key);
-        SeparatedAuthorSymbolDto separatedCompareAuthorSymbol = null;
-
-        /*
-        while(low <= high) {
-            mid = (low + high) / 2;
-
-
-
-            if()
+        // 섹션 별로 효율적인 이진탐색을 진행하기 위해 조회된 모든 row에 대해 저자기호를 전부 분리함
+        List<SeparatedAuthorSymbolDto> separatedAuthorSymbols = new ArrayList<>();
+        for (Bookshelf bookshelf : foundAuthorSymbols) {
+            separatedAuthorSymbols.add(separateAuthorSymbol(bookshelf.getStartCallNumber().getAuthorSymbol()));
         }
-         */
 
+        SeparatedAuthorSymbolDto separatedKeyAuthorSymbol = separateAuthorSymbol(key);
+
+        // 1차 : 저자 초성에 대해 이진탐색
+        Character myKey = separatedKeyAuthorSymbol.getAuthorInitialConsonant();
+        Character myMid = null;
+        boolean keyIsKorean = true;
+        boolean midIsKorean = true;
+        while(lowIndex <= highIndex) {
+            midIndex = (lowIndex + highIndex) / 2;
+            myMid = separatedAuthorSymbols.get(midIndex).getAuthorInitialConsonant();
+
+            // 청구기호와 컴퓨터의 영어, 한글 대소관계가 정반대라서 각 케이스에 대한 처리가 필요
+            if('A' <= myKey && myKey <= 'z') keyIsKorean = false;
+            else keyIsKorean = true;
+            if('A' <= myMid && myMid <= 'z') midIsKorean = false;
+            else midIsKorean = true;
+            if(keyIsKorean && !midIsKorean) {  // key < mid
+                highIndex = midIndex - 1;
+            } else if (!keyIsKorean && midIsKorean) {  // key > mid
+                lowIndex = midIndex + 1;
+            }
+
+            else {
+                if(myKey < myMid) {
+                    highIndex = midIndex - 1;
+                } else if (myKey > myMid) {
+                    lowIndex = midIndex + 1;
+                } else {
+                    break;
+                }
+            }
+        }
+        Character setAuthorInit = myMid;
+
+        // 2차 : 숫자에 대해 이진탐색
+        // 예상되는 리스트 길이가 매우 짧을 것으로 예상되므로 순차탐색을 진행함
+        List<SeparatedAuthorSymbolDto> temp = new ArrayList<>();
+        for (SeparatedAuthorSymbolDto authorSymbol : separatedAuthorSymbols) {
+            if(authorSymbol.getAuthorInitialConsonant() == setAuthorInit)
+                temp.add(authorSymbol);
+        }
+        // 저자 초성이 겹치는 경우 다음 레벨의 이진탐색을 진행
+        if(temp.size() > 1) {
+            lowIndex = 0;
+            highIndex = temp.size() - 1;
+            Integer myKey2 = separatedKeyAuthorSymbol.getNumber();
+            Integer myMid2 = null;
+            while (lowIndex <= highIndex) {
+                midIndex = (lowIndex + highIndex) / 2;
+                myMid2 = temp.get(midIndex).getNumber();
+                if(myKey2 < myMid2) {
+                    highIndex = midIndex - 1;
+                } else if (myKey2 > myKey2) {
+                    lowIndex = midIndex + 1;
+                } else {
+                    break;
+                }
+            }
+        } else if (temp.size() == 1) {
+            midIndex = 0;
+        } else {
+            System.exit(-1);  // 값이 없는 건 DB에 접근하지 못했을 때 뿐임. 심각한 에러라는 것.
+        }
+        Integer setNum = temp.get(midIndex).getNumber();
+
+        // 3차 : 책 제목 초성에 대해 이진탐색
+        List<SeparatedAuthorSymbolDto> temp2 = new ArrayList<>();
+        for (SeparatedAuthorSymbolDto authorSymbol : temp) {
+            if(authorSymbol.getNumber() == setNum)
+                temp2.add(authorSymbol);
+        }
+        // 책 제목 초성이 겹치는 경우 마지막 레벨의 이진탐색을 진행
+        if(temp2.size() > 1) {
+            lowIndex = 0;
+            highIndex = temp2.size() - 1;
+            myKey = separatedKeyAuthorSymbol.getBookInitialConsonant();
+            while (lowIndex <= highIndex) {
+                midIndex = (lowIndex + highIndex) / 2;
+                myMid = temp2.get(midIndex).getBookInitialConsonant();
+                if('A' <= myKey && myKey <= 'z') keyIsKorean = false;
+                else keyIsKorean = true;
+                if('A' <= myMid && myMid <= 'z') midIsKorean = false;
+                else midIsKorean = true;
+                if(keyIsKorean && !midIsKorean) {  // key < mid
+                    highIndex = midIndex - 1;
+                } else if (!keyIsKorean && midIsKorean) {  // key > mid
+                    lowIndex = midIndex + 1;
+                }
+
+                else {
+                    if(myKey < myMid) {
+                        highIndex = midIndex - 1;
+                    } else if (myKey > myMid) {
+                        lowIndex = midIndex + 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        } else if(temp2.size() == 1) {
+            midIndex = 0;
+        } else{
+            System.exit(-1);
+        }
+        Character setBookInit = temp2.get(midIndex).getBookInitialConsonant();
+
+        // 최종적으로 결정된 조각들을 전부 조합
+        String answer = setAuthorInit + String.valueOf(setNum) + setBookInit;
+
+        ColumnAddressResponseDto result = buildBookshelfAuthorSymbolToColumnAddressResponseDto(foundAuthorSymbols, answer);
+        if (result == null)
+            return Optional.empty();
+        else
+            return Optional.of(result);
+    }
+
+    private ColumnAddressResponseDto buildBookshelfAuthorSymbolToColumnAddressResponseDto(
+            List<Bookshelf> bookshelfList, String answer) {
+        for (Bookshelf bookshelf : bookshelfList) {
+            if(bookshelf.getStartCallNumber().getAuthorSymbol().contains(answer)) {
+                return ColumnAddressResponseDto.builder()
+                        .category(bookshelf.getColumnAddress().getCategory())
+                        .bookshelfNum(bookshelf.getColumnAddress().getBookshelfNum())
+                        .columnNum(bookshelf.getColumnAddress().getColumnNum())
+                        .build();
+            }
+        }
 
         return null;
     }
@@ -103,7 +215,7 @@ public class MainService {
         Character authorInit = authorSymbol.charAt(0);
         Character bookInit = null;
 
-        int i;
+        int i;  // for 문 내 변수들은 for문이 종료되면 소멸됨. 재활용하기 위해서 밖으로 꺼내 둠.
         String num = "";  // null로 초기화하면, 문자열 합성 시 null이 들어가서 안됨
         String temp;
         for (i = 1; i < 4; i++) {
@@ -113,9 +225,8 @@ public class MainService {
                 Integer.parseInt(temp);
             } catch (NumberFormatException e) {
                 break;
-            } finally {
-                num = num + temp;
             }
+            num = num + temp;
         }
 
         bookInit = authorSymbol.charAt(i);

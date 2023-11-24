@@ -3,9 +3,11 @@ package com.ajoubooking.demo.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.math.BigDecimal;
+
 @Builder
 @Getter
 public class CallNumberDto {
-    private Float classificationNumber;
+    private BigDecimal classificationNumber;
     private String authorSymbol;
 }
