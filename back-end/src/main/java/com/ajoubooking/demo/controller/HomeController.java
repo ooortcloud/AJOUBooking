@@ -1,7 +1,7 @@
 package com.ajoubooking.demo.controller;
 
-import com.ajoubooking.demo.dto.CallNumberDto;
-import com.ajoubooking.demo.dto.ColumnAddressResponseDto;
+import com.ajoubooking.demo.dto.home.CallNumberDto;
+import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
 import com.ajoubooking.demo.service.MainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

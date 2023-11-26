@@ -2,9 +2,9 @@ package com.ajoubooking.demo.service;
 
 import com.ajoubooking.demo.domain.Bookshelf;
 import com.ajoubooking.demo.domain.embed.ColumnAddress;
-import com.ajoubooking.demo.dto.CallNumberDto;
-import com.ajoubooking.demo.dto.ColumnAddressResponseDto;
-import com.ajoubooking.demo.dto.SeparatedAuthorSymbolDto;
+import com.ajoubooking.demo.dto.home.CallNumberDto;
+import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
+import com.ajoubooking.demo.dto.home.SeparatedAuthorSymbolDto;
 import com.ajoubooking.demo.repository.BookshelfRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

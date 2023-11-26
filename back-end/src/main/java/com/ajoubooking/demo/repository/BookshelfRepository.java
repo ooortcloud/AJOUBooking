@@ -1,7 +1,6 @@
 package com.ajoubooking.demo.repository;
 
 import com.ajoubooking.demo.domain.Bookshelf;
-import com.ajoubooking.demo.dto.CallNumberDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
