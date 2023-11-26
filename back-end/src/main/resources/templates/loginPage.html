@@ -12,23 +12,21 @@
     </div>
 
     <h1 class="h3 mb-3 text-center">Login</h1>
-    <form th:action method="post">
+    <form th:action th:object="${dto}" method="post">
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="ID">
+                    <input type="text" class="form-control" placeholder="ID" th:field="*{admin_id}">
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                    <input type="password" class="form-control" placeholder="Password" th:field="*{pw}">
                 </div>
             </div>
         </div>
         <div class="row justify-content-center">
-            <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="login-btn">로그인</button>
         </div>
     </form>
 </div>
