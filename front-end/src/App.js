@@ -11,25 +11,19 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 검색창에 아무 데이터가 없는것 방지
+    // 검색창에 아무 데이터가 없는 것 방지
     if (!data.trim()) {
       alert('찾고자 하는 책의 청구기호를 입력해주세요!');
       return;
     }
 
-    // 서버에 보낼 데이터
-    const searchData = {
-      callNumber: data,
-    };
-
     try {
-      // 실제 서버 URL로 변경해야 합니다.
-      const response = await fetch('http://localhost:3000/callnumber', {
-        method: 'POST',
+      // 수정된 부분: GET 메소드 사용, 데이터는 URL에 쿼리 매개변수로 전달
+      const response = await fetch(`http://localhost:8080?callNumber=${encodeURIComponent(data)}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(searchData),
       });
 
       if (!response.ok) {
@@ -72,8 +66,8 @@ function App() {
           {result && (
             <div>
               <p>"category" : "{result.category}"</p>
-              <p>"bookshelf_num" : "{result.bookshelf_num}"</p>
-              <p>"column_num" : "{result.column_num}"</p>
+              <p>"bookshelfNum" : "{result.bookshelfNum}"</p>
+              <p>"columnNum" : "{result.columnNum}"</p>
             </div>
           )}
         </div>
