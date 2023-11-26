@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,15 +26,21 @@ public class MainService {
     }
 
 
-    public CallNumberDto separateRequestCallNumber(String callNumber) {
+    public CallNumberDto separateRequestCallNumber(String callNumber) throws InputMismatchException {  // 예외처리를 하기 위해 throws 사용
         String[] s = callNumber.split(" ");
 
         BigDecimal bigDecimal = null;
         CallNumberDto callNumberDto = null;
+        
+        int checkLen = s.length;
+        // 잘못된 입력 양식에 대해서는 예외처리
+        if(checkLen > 3 || checkLen <= 1) {
+            throw new InputMismatchException("청구기호 띄어쓰기 기본 양식을 벗어남.");
+        }
 
-        // 별치기호 예외처리
+        // 별치기호 입력된 경우 별개 처리
         int i = 0;
-        if (s.length == 3) {
+        if (checkLen == 3) {
             i++;
         }
         bigDecimal = BigDecimal.valueOf(Double.valueOf(s[i]));  // Long은 String 타입 변환 지원 안함
@@ -45,14 +52,17 @@ public class MainService {
         return callNumberDto;
     }
 
-    public Optional<ColumnAddressResponseDto> binarySearchForResponse(CallNumberDto callNumberDto) {
+    public Optional<ColumnAddressResponseDto> binarySearchForResponse(CallNumberDto callNumberDto) throws InputMismatchException {
 
         Bookshelf foundRow = bookshelfRepository
                 .findFirstByStartCallNumberClassificationNumberLessThanEqualOrderByStartCallNumberClassificationNumberDesc(callNumberDto.getClassificationNumber());
-
+        if(foundRow == null)  // 예외처리
+            throw new InputMismatchException("존재할 수 없는 행 위치");
+        
         List<Bookshelf> foundAuthorSymbols = bookshelfRepository.findByStartCallNumberClassificationNumber(
                 foundRow.getStartCallNumber().getClassificationNumber());
 
+        // 결과값이 1개뿐이어서 이진탐색을 할 필요가 없는 경우
         if (foundAuthorSymbols.size() == 1) {
             ColumnAddress answer = foundAuthorSymbols.get(0).getColumnAddress();
             return Optional.of(ColumnAddressResponseDto.builder()
@@ -186,6 +196,7 @@ public class MainService {
         // 최종적으로 결정된 조각들을 전부 조합
         String answer = setAuthorInit + String.valueOf(setNum) + setBookInit;
 
+        // body에 채워넣을 객체값 만들기
         ColumnAddressResponseDto result = buildBookshelfAuthorSymbolToColumnAddressResponseDto(foundAuthorSymbols, answer);
         if (result == null)
             return Optional.empty();
