@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 @Getter
 public class Admin {
 
+
 }
