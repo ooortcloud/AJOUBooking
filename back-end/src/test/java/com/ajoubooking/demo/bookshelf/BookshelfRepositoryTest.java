@@ -1,4 +1,4 @@
-package com.ajoubooking.demo;
+package com.ajoubooking.demo.bookshelf;
 
 import com.ajoubooking.demo.domain.Bookshelf;
 import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;

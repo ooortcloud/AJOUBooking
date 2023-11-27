@@ -2,7 +2,6 @@ package com.ajoubooking.demo.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +12,6 @@ public class Admin {
     @Id
     private Long id;
 
-    private String admin_id;
+    private String adminId;
     private String pw;
 }
