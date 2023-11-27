@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @NoArgsConstructor
-@Setter  // @RequestBody를 사용한 JSON 변환에 필요
+// @Setter  // @RequestBody를 사용한 JSON 변환에 필요
 public class StringRequestDto {
     private String callNumber;
 }
