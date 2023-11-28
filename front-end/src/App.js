@@ -19,7 +19,9 @@ function App() {
 
     try {
       // 수정된 부분: GET 메소드 사용, 데이터는 URL에 쿼리 매개변수로 전달
-      const response = await fetch(`http://localhost:3000/callnumber?callNumber=${encodeURIComponent(data)}`, {
+
+      const response = await fetch(`http://localhost:8080?callNumber=${encodeURIComponent(data)}`, {
+
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -70,8 +72,8 @@ function App() {
           {result && (
             <div>
               <p>"category" : "{result.category}"</p>
-              <p>"bookshelf_num" : "{result.bookshelf_num}"</p>
-              <p>"column_num" : "{result.column_num}"</p>
+              <p>"bookshelfNum" : "{result.bookshelfNum}"</p>
+              <p>"columnNum" : "{result.columnNum}"</p>
             </div>
           )}
         </div>
