@@ -1,7 +1,7 @@
 // App.js
 import React, { useState } from 'react';
 import './App.css'; // 스타일 파일 추가
-import Map from './Map.js'; // Map 컴포넌트 추가
+import Map from './Map'; // Map 컴포넌트 추가
 
 function App() {
   const [data, setData] = useState('');
@@ -11,25 +11,19 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 검색창에 아무 데이터가 없는것 방지
+    // 검색창에 아무 데이터가 없는 것 방지
     if (!data.trim()) {
       alert('찾고자 하는 책의 청구기호를 입력해주세요!');
       return;
     }
 
-    // 서버에 보낼 데이터
-    const searchData = {
-      callNumber: data,
-    };
-
     try {
-      // 실제 서버 URL로 변경해야 합니다.
-      const response = await fetch('http://localhost:3000/callnumber', {
-        method: 'POST',
+      // 수정된 부분: GET 메소드 사용, 데이터는 URL에 쿼리 매개변수로 전달
+      const response = await fetch(`http://localhost:3000/callnumber?callNumber=${encodeURIComponent(data)}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(searchData),
       });
 
       if (!response.ok) {
@@ -39,7 +33,9 @@ function App() {
       const resultData = await response.json();
       setResult(resultData);
       setShowMap(true); // Map 컴포넌트를 표시
-      
+    
+      // 수정된 부분: form-container의 style.display 속성을 none으로 설정하여 숨김
+      document.querySelector('.form-container').style.display = 'none';
     } catch (error) {
       console.error('Error:', error);
     }
@@ -65,8 +61,10 @@ function App() {
             />
             <button type="submit" className="btn btn-primary" id="hidden-btn">위치 검색</button>
           </form>
+          <div>
+          <a href="https://library.ajou.ac.kr/#/">도서관 홈페이지에서 '청구기호'를 확인하세요!</a>
         </div>
-       
+        </div>
         <div>
           {/* 결과 출력 */}
           {result && (
@@ -76,9 +74,6 @@ function App() {
               <p>"column_num" : "{result.column_num}"</p>
             </div>
           )}
-        </div>
-        <div>
-          <a href="https://library.ajou.ac.kr/#/">도서관 홈페이지에서 '청구기호'를 확인하세요!</a>
         </div>
       </div>
     </div>
