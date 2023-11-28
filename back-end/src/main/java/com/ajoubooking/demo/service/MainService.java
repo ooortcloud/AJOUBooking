@@ -26,7 +26,7 @@ public class MainService {
     }
 
 
-    public CallNumberDto separateRequestCallNumber(String callNumber) throws InputMismatchException {  // 예외처리를 하기 위해 throws 사용
+    public CallNumberDto separateRequestCallNumber(String callNumber){  // 예외처리를 하기 위해 throws 사용
         String[] s = callNumber.split(" ");
 
         BigDecimal bigDecimal = null;
@@ -43,7 +43,12 @@ public class MainService {
         if (checkLen == 3) {
             i++;
         }
-        bigDecimal = BigDecimal.valueOf(Double.valueOf(s[i]));  // Long은 String 타입 변환 지원 안함
+        try {
+            bigDecimal = BigDecimal.valueOf(Double.valueOf(s[i]));  // Long은 String 타입 변환 지원 안함
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("분류번호가 문자로 입력됨");
+        }
+
         callNumberDto = CallNumberDto.builder()
                 .classificationNumber(bigDecimal)
                 .authorSymbol(s[i+1])

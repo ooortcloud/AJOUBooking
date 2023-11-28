@@ -2,9 +2,9 @@ package com.ajoubooking.demo.controller;
 
 import com.ajoubooking.demo.dto.home.CallNumberDto;
 import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
-import com.ajoubooking.demo.dto.home.StringRequestDto;
 import com.ajoubooking.demo.service.MainService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.InputMismatchException;
 import java.util.Optional;
 
-// @CrossOrigin(origins = "http://localhost:3000/*")
+// @CrossOrigin(origins = "http://localhost:3000/*")  // CORS 해결 어노테이션
 @RestController  // 자바 객체를 HttpResponse의 본문 내용과 매핑해줌
 class HomeController {
 
@@ -26,16 +26,16 @@ class HomeController {
         try {
             CallNumberDto requestedCallNumber = mainService.separateRequestCallNumber(callNumber);
             responseDto = mainService.binarySearchForResponse(requestedCallNumber);
-        } catch (InputMismatchException e) {
+        } catch (Exception e) {
             System.out.println(LocalDate.now() + " >> " +  e.getMessage());
-            return (ResponseEntity<ColumnAddressResponseDto>) ResponseEntity.badRequest();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         if(responseDto.isPresent())
             return ResponseEntity.ok(responseDto.get());
         else{
             System.out.println("내부 이진 탐색 연산이 잘못됨...");
-            return (ResponseEntity<ColumnAddressResponseDto>) ResponseEntity.internalServerError();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
