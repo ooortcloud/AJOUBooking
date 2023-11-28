@@ -21,10 +21,10 @@ class HomeController {
 
     // POST로 값을 입력받으면 DB 데이터를 바탕으로 로직으로 처리해서 Front서버에 반환
     @GetMapping("")
-    public ResponseEntity<ColumnAddressResponseDto> response(@RequestParam StringRequestDto callNumber) {
+    public ResponseEntity<ColumnAddressResponseDto> response(@RequestParam(value = "callNumber") String callNumber) {
         Optional<ColumnAddressResponseDto> responseDto;
         try {
-            CallNumberDto requestedCallNumber = mainService.separateRequestCallNumber(callNumber.getCallNumber());
+            CallNumberDto requestedCallNumber = mainService.separateRequestCallNumber(callNumber);
             responseDto = mainService.binarySearchForResponse(requestedCallNumber);
         } catch (InputMismatchException e) {
             System.out.println(LocalDate.now() + " >> " +  e.getMessage());
