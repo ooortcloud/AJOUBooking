@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 public class Admin {
     @Id
-    private Long id;
+    private Integer id;
 
-    private String adminId;
     private String pw;
 }

@@ -3,7 +3,6 @@ package com.ajoubooking.demo.admin;
 import com.ajoubooking.demo.domain.Admin;
 import com.ajoubooking.demo.dto.admin.AdminDto;
 import com.ajoubooking.demo.repository.AdminRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +24,11 @@ public class AdminRepositoryTest {
     @Test
     @DisplayName("계정 조회 테스트")
     void findByAdminIdAndPwTest() {
-        Admin found = adminRepository.findByAdminIdAndPw("root", "1234");
+        Admin found = adminRepository.findByPw("1234");
         AdminDto test = AdminDto.builder()
-                .adminId(found.getAdminId())
                 .pw(found.getPw())
                 .build();
         AdminDto answer = AdminDto.builder()
-                .adminId("root")
                 .pw("1234")
                 .build();
 

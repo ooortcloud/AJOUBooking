@@ -11,8 +11,8 @@ public class AdminService {
     @Autowired
     private AdminRepository adminRepository;
 
-    public boolean validateRequestLogin(String adminId, String pw){
-        Admin foundAdmin = adminRepository.findByAdminIdAndPw(adminId, pw);
+    public boolean validateRequestLogin(String pw){
+        Admin foundAdmin = adminRepository.findByPw(pw);
         // 계정을 찾을 수 없으면 예외처리
         if(foundAdmin == null) return false;
         return true;

@@ -3,9 +3,9 @@ package com.ajoubooking.demo.repository;
 import com.ajoubooking.demo.domain.Admin;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AdminRepository extends JpaRepository<Admin, Long> {
+public interface AdminRepository extends JpaRepository<Admin, Integer> {
 
-    Admin findByAdminIdAndPw(String adminId, String pw);
+    Admin findByPw(String pw);
 
 
 }
