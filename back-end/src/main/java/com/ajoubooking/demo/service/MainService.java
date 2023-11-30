@@ -61,7 +61,7 @@ public class MainService {
         
         List<Bookshelf> foundAuthorSymbols = bookshelfRepository.findByStartCallNumberClassificationNumber(
                 foundRow.getStartCallNumber().getClassificationNumber());
-
+        /*  이 분기문을 넣어버리면 오히려 예외처리를 안하게 되어버림.
         // 결과값이 1개뿐이어서 이진탐색을 할 필요가 없는 경우
         if (foundAuthorSymbols.size() == 1) {
             ColumnAddress answer = foundAuthorSymbols.get(0).getColumnAddress();
@@ -72,6 +72,8 @@ public class MainService {
                     .build());
         }
         else
+
+         */
             return binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundAuthorSymbols);
     }
 
