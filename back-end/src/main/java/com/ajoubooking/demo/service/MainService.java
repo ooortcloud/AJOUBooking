@@ -35,7 +35,7 @@ public class MainService {
         int checkLen = s.length;
         // 잘못된 입력 양식에 대해서는 예외처리
         if(checkLen > 3 || checkLen <= 1) {
-            throw new InputMismatchException("청구기호 띄어쓰기 기본 양식을 벗어남.");
+            throw new InputMismatchException("청구기호의 기본 양식을 벗어났습니다.");
         }
 
         // 별치기호 입력된 경우 별개 처리
@@ -46,7 +46,7 @@ public class MainService {
         try {
             bigDecimal = BigDecimal.valueOf(Double.valueOf(s[i]));  // Long은 String 타입 변환 지원 안함
         } catch (NumberFormatException e) {
-            throw new NumberFormatException("분류번호가 문자로 입력됨");
+            throw new NumberFormatException("분류번호는 반드시 숫자여야 합니다.");
         }
 
         callNumberDto = CallNumberDto.builder()
@@ -57,26 +57,16 @@ public class MainService {
         return callNumberDto;
     }
 
-    public Optional<ColumnAddressResponseDto> binarySearchForResponse(CallNumberDto callNumberDto) throws InputMismatchException {
+    public Optional<ColumnAddressResponseDto> binarySearchForResponse(CallNumberDto callNumberDto) {
 
         Bookshelf foundRow = bookshelfRepository
                 .findFirstByStartCallNumberClassificationNumberLessThanEqualOrderByStartCallNumberClassificationNumberDesc(callNumberDto.getClassificationNumber());
         if(foundRow == null)  // 예외처리
-            throw new InputMismatchException("존재할 수 없는 행 위치");
+            throw new InputMismatchException("존재할 수 없는 행 위치입니다.");
         
         List<Bookshelf> foundAuthorSymbols = bookshelfRepository.findByStartCallNumberClassificationNumber(
                 foundRow.getStartCallNumber().getClassificationNumber());
 
-        // 결과값이 1개뿐이어서 이진탐색을 할 필요가 없는 경우
-        if (foundAuthorSymbols.size() == 1) {
-            ColumnAddress answer = foundAuthorSymbols.get(0).getColumnAddress();
-            return Optional.of(ColumnAddressResponseDto.builder()
-                    .category(answer.getCategory())
-                    .bookshelfNum(answer.getBookshelfNum())
-                    .columnNum(answer.getColumnNum())
-                    .build());
-        }
-        else
             return binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundAuthorSymbols);
     }
 
@@ -240,17 +230,22 @@ public class MainService {
             try {
                 Integer.parseInt(temp);
             } catch (NumberFormatException e) {
-                break;
+                break;  // 문자를 만나면 파싱 종료
             }
             num = num + temp;
         }
 
         bookInit = authorSymbol.charAt(i);
-
-        return SeparatedAuthorSymbolDto.builder()
-                .authorInitialConsonant(authorInit)
-                .number(Integer.parseInt(num))
-                .bookInitialConsonant(bookInit)
-                .build();
+        
+        // 저자기호가 전부 문자인 경우 예외처리
+        try{
+            return SeparatedAuthorSymbolDto.builder()
+                    .authorInitialConsonant(authorInit)
+                    .number(Integer.parseInt(num))
+                    .bookInitialConsonant(bookInit)
+                    .build();
+        } catch (Exception e) {
+            throw new InputMismatchException("저자기호 입력 양식이 잘못되었습니다.");
+        }
     }
 }
