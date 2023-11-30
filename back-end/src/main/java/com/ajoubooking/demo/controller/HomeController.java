@@ -38,4 +38,9 @@ class HomeController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/health")
+    public ResponseEntity sendOk() {
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
