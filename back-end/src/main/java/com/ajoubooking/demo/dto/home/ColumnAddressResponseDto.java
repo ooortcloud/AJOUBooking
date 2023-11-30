@@ -1,4 +1,4 @@
-package com.ajoubooking.demo.dto;
+package com.ajoubooking.demo.dto.home;
 
 import com.ajoubooking.demo.domain.embed.ColumnAddress;
 import jakarta.persistence.Column;

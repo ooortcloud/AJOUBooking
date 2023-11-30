@@ -1,4 +1,4 @@
-package com.ajoubooking.demo.dto;
+package com.ajoubooking.demo.dto.home;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,7 +1,7 @@
-package com.ajoubooking.demo;
+package com.ajoubooking.demo.bookshelf;
 
-import com.ajoubooking.demo.dto.CallNumberDto;
-import com.ajoubooking.demo.dto.ColumnAddressResponseDto;
+import com.ajoubooking.demo.dto.home.CallNumberDto;
+import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
 import com.ajoubooking.demo.service.MainService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
