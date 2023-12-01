@@ -7,20 +7,17 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.118.2">
-    <title>AJOU Booking - login</title>
+    <title>AJOU Booking</title>
 
-    <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/sign-in/">
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/checkout/">
+
+    
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
-
-
 
 <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-      .my-error {
-        color: red;
-      }
-
       .bd-placeholder-img {
         font-size: 1.125rem;
         text-anchor: middle;
@@ -101,9 +98,9 @@
 
     
     <!-- Custom styles for this template -->
-    <link href="/css/sign-in.css" rel="stylesheet">
+    <link href="/css/checkout.css" rel="stylesheet">
   </head>
-  <body class="d-flex align-items-center py-4 bg-body-tertiary">
+  <body class="bg-body-tertiary">
     <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
       <symbol id="check2" viewBox="0 0 16 16">
         <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
@@ -156,23 +153,41 @@
     </div>
 
     
-<main class="form-signin w-100 m-auto">
-  <form th:action th:object="${dto}" method="post">
-    <!--/* <img class="mb-4" src="../img/logo.png" alt="" width="72" height="57"> */-->
-    <h1 class="h3 mb-3 fw-normal">🚧 관리자 인증 필요</h1>
-
-    <div class="form-floating">
-      <input type="password" class="form-control" id="pw" th:field="*{pw}" placeholder="Password">
-      <label for="pw">Password</label>
+<div class="container">
+  <main>
+    <div class="py-5 text-center">
+      <!-- /* <img class="d-block mx-auto mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> */ -->
+      <h2>비밀번호 변경</h2>
     </div>
 
-    <p th:if="${#fields.hasErrors('pw')}" th:errors="*{pw}" th:errorclass="my-error">pw field error</p>
+    <div class="row g-5">
+        <form class="needs-validation" novalidate>
+            <div class="col-12 my-4">
+              <label for="password1" class="form-label">변경할 비밀번호</label>
+              <input type="password" class="form-control" id="password1" placeholder="변경할 비밀번호 입력">
+              <div class="invalid-feedback">
+                Please enter a valid email address for shipping updates.
+              </div>
+            </div>
 
-    <button class="btn btn-primary w-100 py-2" type="submit">로그인</button>
-    <p class="mt-5 mb-3 text-body-secondary">&copy; 2023</p>
-  </form>
-</main>
+            <div class="col-12 my-4">
+              <label for="password2" class="form-label">변경할 비밀번호 재입력</label>
+              <input type="password" class="form-control" id="password2" placeholder="비밀번호 재입력">
+              <div class="invalid-feedback">
+                Please enter your shipping address.
+              </div>
+            </div>
+
+          <button class="w-100 btn btn-primary btn-lg" type="submit">비밀번호 변경하기</button>
+        </form>
+    </div>
+  </main>
+
+  <footer class="my-5 pt-5 text-body-secondary text-center text-small">
+    <p class="mb-1">&copy; 2023</p>
+  </footer>
+</div>
 <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
 
-    </body>
+    <script src="/js/checkout.js"></script></body>
 </html>

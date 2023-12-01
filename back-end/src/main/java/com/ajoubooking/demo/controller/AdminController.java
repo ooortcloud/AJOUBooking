@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/login")  // 헤드 엔드포인트 설정
+/**
+ * /login 엔드포인트에서 활동할 때는 항상 세션 검사를 통해 적절한 페이지를 제시해야 한다.
+ */
 public class AdminController {
 
     @Autowired
@@ -60,18 +63,17 @@ public class AdminController {
         return "adminMain";
     }
 
-    @GetMapping("/change")
-    public String checkIdPw(@ModelAttribute AdminDto dto, Model model) {
+    @GetMapping("/changePw")
+    public String checkPw(Model model) {
         model.addAttribute("dto", AdminDto.builder().build());
-        return "changePw1";
+        return "changePw";
     }
 
-    // changePw2로 가는 경우 유효성 검사 필요..
-    @PostMapping("/change")
+    @PostMapping("/changePw")
     public String changePw(@Valid @ModelAttribute("dto") AdminDto dto, BindingResult bindingResult) {
 
         if(true)
-            return "redirect:/login";
-        return "redirect:/login/change";
+            return "adminMain";
+        return "changePw";
     }
 }
