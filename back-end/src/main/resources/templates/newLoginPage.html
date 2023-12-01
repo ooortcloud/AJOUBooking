@@ -10,14 +10,17 @@
     <title>AJOU Booking</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/sign-in/">
-
-    
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
+
+
 
 <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+      .my-error {
+        color: red;
+      }
+
       .bd-placeholder-img {
         font-size: 1.125rem;
         text-anchor: middle;
@@ -159,13 +162,11 @@
     <h1 class="h3 mb-3 fw-normal">인증 확인이 필요합니다.</h1>
 
     <div class="form-floating">
-      <input type="password" class="form-control" th:errorclass="field-error" id="pw" th:field="*{pw}" placeholder="Password">
+      <input type="password" class="form-control" id="pw" th:field="*{pw}" placeholder="Password">
       <label for="pw">Password</label>
     </div>
 
-    <div th:if="${#fields.hasErrors('global')}">
-      <p class="field-error" th:each="err : ${#fields.globalErrors()}"  th:text="${err}">로그인 입력 오류</p>
-    </div>
+    <p th:if="${#fields.hasErrors('pw')}" th:errors="*{pw}" th:errorclass="my-error">pw field error</p>
 
     <button class="btn btn-primary w-100 py-2" type="submit">로그인</button>
     <p class="mt-5 mb-3 text-body-secondary">&copy; 2023</p>
