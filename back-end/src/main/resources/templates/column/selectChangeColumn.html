@@ -171,28 +171,65 @@
 
     <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
       <h2>Column 시작 청구기호 변경</h2>
-      <p class="fs-5 text-body-primary">하단 입력 박스에 현재 적용하고자 하는 청구기호를 입력해주세요.</p>
+      <p class="fs-5 text-body-primary">변경하고자 하는 청구기호를 선택해주세요.</p>
+      <p class="fs-5 text-body-secondary">⚠️주의: 선택 후 되돌릴 수 없습니다.</p>
     </div>
   </header>
 
   <main>
-    <form th:action th:object="${columnDto}" method="post">
-      <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
-        <div class="col mx-auto">
-          <div class="card mb-4 rounded-3 shadow-sm">
-            <div class="card-header py-3">
-              <h4 class="my-0 fw-normal">적용할 값</h4>
-            </div>
-            <div class="card-body">
-              <label for="inputCallNumber" class="form-label">적용할 청구기호</label>
-              <input type="text" class="form-control" id="inputCallNumber" th:field="*{inputCallNumber}" placeholder="적용할 청구기호를 입력">
-              <p th:if="${#fields.hasErrors('inputCallNumber')}" th:errors="*{inputCallNumber}" th:class="my-error">field error</p>
-              <button type="submit" class="w-100 btn btn-lg btn-primary mt-4">입력</button>
-            </div>
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-header py-3">
+            <h4 class="my-0 fw-normal">Free</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">$0<small class="text-body-secondary fw-light">/mo</small></h1>
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>10 users included</li>
+              <li>2 GB of storage</li>
+              <li>Email support</li>
+              <li>Help center access</li>
+            </ul>
+            <button type="button" class="w-100 btn btn-lg btn-outline-primary">Sign up for free</button>
           </div>
         </div>
       </div>
-    </form>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-header py-3">
+            <h4 class="my-0 fw-normal">Pro</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">$15<small class="text-body-secondary fw-light">/mo</small></h1>
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>20 users included</li>
+              <li>10 GB of storage</li>
+              <li>Priority email support</li>
+              <li>Help center access</li>
+            </ul>
+            <button type="button" class="w-100 btn btn-lg btn-primary">Get started</button>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm border-primary">
+          <div class="card-header py-3 text-bg-primary border-primary">
+            <h4 class="my-0 fw-normal">Enterprise</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">$29<small class="text-body-secondary fw-light">/mo</small></h1>
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>30 users included</li>
+              <li>15 GB of storage</li>
+              <li>Phone and email support</li>
+              <li>Help center access</li>
+            </ul>
+            <button type="button" class="w-100 btn btn-lg btn-primary">Contact us</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer class="pt-4 my-md-5 pt-md-5 border-top">

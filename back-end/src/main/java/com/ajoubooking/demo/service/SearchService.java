@@ -15,23 +15,26 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * 조회 서비스 로직이 중복되어서 따로 조회 전용 서비스를 팠다.
+ */
 @Service
-@Transactional  // 프록시 객체를 생성하여 자동 commit, rollback 등의 트랜잭션 처리
-public class MainService {
+@Transactional
+public class SearchService {
 
     private final BookshelfRepository bookshelfRepository;
 
-    public MainService(BookshelfRepository bookshelfRepository) {
+    public SearchService(BookshelfRepository bookshelfRepository) {
         this.bookshelfRepository = bookshelfRepository;
     }
 
-
-    public CallNumberDto separateRequestCallNumber(String callNumber){  // 예외처리를 하기 위해 throws 사용
+    // 입력된 청구기호를 띄어쓰기를 기반으로 분리해줌. << 청구기호 간 순서를 구분하기 위함
+    public CallNumberDto separateRequestCallNumber(String callNumber){ 
         String[] s = callNumber.split(" ");
 
         BigDecimal bigDecimal = null;
         CallNumberDto callNumberDto = null;
-        
+
         int checkLen = s.length;
         // 잘못된 입력 양식에 대해서는 예외처리
         if(checkLen > 3 || checkLen <= 1) {
@@ -57,29 +60,22 @@ public class MainService {
         return callNumberDto;
     }
 
-    public Optional<ColumnAddressResponseDto> binarySearchForResponse(CallNumberDto callNumberDto) throws InputMismatchException {
+
+    // 분리된 청구기호를 바탕으로 이진탐색을 진행함
+    public Optional<ColumnAddressResponseDto> binarySearchForResponse(CallNumberDto callNumberDto) {
 
         Bookshelf foundRow = bookshelfRepository
                 .findFirstByStartCallNumberClassificationNumberLessThanEqualOrderByStartCallNumberClassificationNumberDesc(callNumberDto.getClassificationNumber());
         if(foundRow == null)  // 예외처리
             throw new InputMismatchException("존재할 수 없는 행 위치");
-        
+
         List<Bookshelf> foundAuthorSymbols = bookshelfRepository.findByStartCallNumberClassificationNumber(
                 foundRow.getStartCallNumber().getClassificationNumber());
 
-        // 결과값이 1개뿐이어서 이진탐색을 할 필요가 없는 경우
-        if (foundAuthorSymbols.size() == 1) {
-            ColumnAddress answer = foundAuthorSymbols.get(0).getColumnAddress();
-            return Optional.of(ColumnAddressResponseDto.builder()
-                    .category(answer.getCategory())
-                    .bookshelfNum(answer.getBookshelfNum())
-                    .columnNum(answer.getColumnNum())
-                    .build());
-        }
-        else
             return binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundAuthorSymbols);
     }
 
+    // 저자기호는 문자와 숫자의 조합이기에, 한번 더 쪼개서 순서를 비교해야 함.
     private Optional<ColumnAddressResponseDto> binarySearchForAuthor(String key, List<Bookshelf> foundAuthorSymbols) {
 
         int lowIndex = 0;
@@ -209,6 +205,7 @@ public class MainService {
             return Optional.of(result);
     }
 
+    // 최종적으로 위치를 리턴하기 위해 좌표값들을 조합해주는 헬퍼 메서드
     private ColumnAddressResponseDto buildBookshelfAuthorSymbolToColumnAddressResponseDto(
             List<Bookshelf> bookshelfList, String answer) {
         for (Bookshelf bookshelf : bookshelfList) {
@@ -224,6 +221,7 @@ public class MainService {
         return null;
     }
 
+    // 저자기호를 분리해주는 헬퍼 메소드
     private SeparatedAuthorSymbolDto separateAuthorSymbol(String authorSymbol) {  // authorSymbol : B187hK한
         int n = authorSymbol.length();
         Character c;

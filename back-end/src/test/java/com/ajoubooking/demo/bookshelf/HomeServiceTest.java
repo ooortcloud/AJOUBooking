@@ -2,7 +2,7 @@ package com.ajoubooking.demo.bookshelf;
 
 import com.ajoubooking.demo.dto.home.CallNumberDto;
 import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
-import com.ajoubooking.demo.service.MainService;
+import com.ajoubooking.demo.service.HomeService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,17 +16,17 @@ import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest  // 통합 테스트
 @Transactional
-public class MainServiceTest {
-    private final MainService mainService;
+public class HomeServiceTest {
+    private final HomeService homeService;
 
     @Autowired  // Jupitor5 가 의존성 주입이 필요한 생성자를 인지하도록 하여, Spring 컨테이너에 의존성 주입을 요청하도록 함
-    public MainServiceTest(MainService mainService) {
-        this.mainService = mainService;
+    public HomeServiceTest(HomeService homeService) {
+        this.homeService = homeService;
     }
 
     @Test
     void testSeparateRequestCallNumber() {
-        CallNumberDto callNumberDto = mainService.separateRequestCallNumber("005.8 B187hK한");
+        CallNumberDto callNumberDto = homeService.separateRequestCallNumber("005.8 B187hK한");
         CallNumberDto callNumberDto2 = CallNumberDto.builder()
                 .classificationNumber(BigDecimal.valueOf(5.8))
                 .authorSymbol("B187hK한")
@@ -37,7 +37,7 @@ public class MainServiceTest {
 
     @Test
     void testSeparateRequestCallNumberException() {
-        CallNumberDto callNumberDto = mainService.separateRequestCallNumber("일 005.8 B187hK한");
+        CallNumberDto callNumberDto = homeService.separateRequestCallNumber("일 005.8 B187hK한");
         CallNumberDto callNumberDto2 = CallNumberDto.builder()
                 .classificationNumber(BigDecimal.valueOf(5.8))
                 .authorSymbol("B187hK한")
@@ -49,7 +49,7 @@ public class MainServiceTest {
     @Test
     @DisplayName("Service 이진탐색 전체 테스트")  // 값만 비교했을 때 성공
     void binarySearchForResponseTest() {
-        Optional<ColumnAddressResponseDto> result = mainService.binarySearchForResponse(CallNumberDto.builder()
+        Optional<ColumnAddressResponseDto> result = homeService.binarySearchForResponse(CallNumberDto.builder()
                 .classificationNumber(BigDecimal.valueOf(5.8))
                 .authorSymbol("B187hK한")
                 .build());

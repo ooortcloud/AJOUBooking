@@ -1,7 +1,7 @@
 package com.ajoubooking.demo.repository;
 
 import com.ajoubooking.demo.domain.Admin;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ajoubooking.demo.dto.admin.AdminDto;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -9,16 +9,22 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class AdminRepository {
-    @Autowired  // Spring Container에 등록된 @Repository들을 자동으로 DI 시킴
-    private AdminDataRepository dataRepository;
-    @Autowired
-    private AdminQueryRepository queryRepository;
 
-    public Admin findByPw(String pw) {
-        return dataRepository.findByPw(pw);
+    private final AdminDataRepository dataRepository;
+    private final AdminQueryRepository queryRepository;
+
+    public AdminRepository(AdminDataRepository dataRepository, AdminQueryRepository queryRepository) {
+        this.dataRepository = dataRepository;
+        this.queryRepository = queryRepository;
+    }
+
+    public AdminDto findByPw(String pw) {
+        Admin temp = dataRepository.findByPw(pw);
+        return AdminDto.builder().pw(temp.getPw()).build();
     }
 
     public void updatePw(String newPw) {
         queryRepository.updatePw(newPw);
     }
+
 }

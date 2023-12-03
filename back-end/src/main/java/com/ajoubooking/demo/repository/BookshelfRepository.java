@@ -22,4 +22,6 @@ public interface BookshelfRepository extends JpaRepository<Bookshelf, Long> {  /
     /*
         1. 입력된 분류번호와 일치하는 모든 row들을 리턴.
      */
+
+    Bookshelf
 }
