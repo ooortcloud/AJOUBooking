@@ -1,24 +1,20 @@
-package com.ajoubooking.demo.controller;
+package com.ajoubooking.demo.controller.admin;
 
 import com.ajoubooking.demo.dto.admin.AdminDto;
-import com.ajoubooking.demo.dto.admin.ChangePwDto;
-import com.ajoubooking.demo.dto.admin.CheckPwDto;
 import com.ajoubooking.demo.service.AdminService;
 import jakarta.validation.Valid;
-import org.apache.tomcat.util.http.fileupload.RequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
 
 @Controller
 @RequestMapping("/login")  // 헤드 엔드포인트 설정
 /**
  * /login 엔드포인트에서 활동할 때는 항상 세션 검사를 통해 적절한 페이지를 제시해야 한다.
  */
-public class AdminController {
+public class AdminMainController {
 
     @Autowired
     private AdminService adminService;
@@ -58,8 +54,7 @@ public class AdminController {
         }
 
         // 계정 조회에 실패한 경우 에러 메시지를 담아서 view에 리턴.
-        boolean b = adminService.validateRequestLogin(dto.getPw());
-        if(!b){
+        if(!adminService.validateRequestLogin(dto.getPw())){
             /**
              * bindingResult.rejectValue()  << 필드 에러
              * bindingResult.reject()  << 객체 에러
@@ -72,60 +67,5 @@ public class AdminController {
         return "redirect:/login/main";  // 리다이랙트로 새 페이지를 띄우지 않고 현재 페이지에서 곧바로 이동시킴. 유효성 검사 필요
     }
 
-    /**
-     * @param model  : 새로운 객체를 전달하려면, 이전에 쓴 model 키값과 다른 이름으로 선언해줘야 thymeleaf에서 혼선을 일으키지 않는다.
-     */
-    @GetMapping("/beforeChangePw")
-    public String checkPw(Model model) {
-        model.addAttribute("beforeDto", CheckPwDto.builder().build());
-        return "beforeChangePw";
-    }
 
-    /**
-     * 비밀번호 변경 전 현재 실제 관리자가 제어하는 것이 맞는지 재확인하는 메소드.
-     * @param beforeDto  : 앞서 model 키값을 변경했으니, 여기서도 동일한 값으로 파라미터명을 변경해줘야 modelAttirubute가 제대로 적용됨.
-     *
-     * @return redirect : 그냥 리턴하면 th:action에 따라 url이 고정되어버려서 에러남.
-     *                      따라서 redirect로 엔드포인트를 바꿔줘야 의도된 Get 요청을 하게 됨.
-     *                      참고로 redirect 주소에 상대 주소 규칙을 적용할 수 있음.
-     */
-    @PostMapping("/beforeChangePw")
-    public String checkPwValidation(@Valid @ModelAttribute("beforeDto") CheckPwDto beforeDto, BindingResult bindingResult) {
-
-        if(bindingResult.hasErrors()){
-            return "beforeChangePw";
-        }
-
-        if(!adminService.validateRequestLogin(beforeDto.getInputPw())) {
-            bindingResult.rejectValue("inputPw", null, "pw 입력이 잘못되었습니다.");
-            return "beforeChangePw";
-        }
-
-        return "redirect:./afterChangePw";
-    }
-
-    @GetMapping("/afterChangePw")
-    public String changePw(Model model) {
-        model.addAttribute("afterDto", ChangePwDto.builder().build());
-        return "afterChangePw";
-    }
-
-    @PostMapping("/afterChangePw")
-    public String changePwValidation(@Valid @ModelAttribute("afterDto") ChangePwDto afterDto, BindingResult bindingResult) {
-
-        if(bindingResult.hasErrors()){
-            return "afterChangePw";
-        }
-
-        // 두 입력값이 일치하지 않는 경우 예외처리
-        if(!afterDto.getInputB().equals(afterDto.getInputA())) {
-            bindingResult.rejectValue("inputB", null, "입력된 두 값이 서로 일치하지 않습니다.");
-            return "afterChangePw";
-        }
-
-        adminService.changePw(afterDto.getInputB());
-
-        // 해당 페이지에는 어떤 객체도 전달할 필요가 없기 때문에 thymeleaf와 충돌나지 않음 >> url 고정시키고 새 html 페이지만 렌더링.
-        return "successChangePw";
-    }
 }
