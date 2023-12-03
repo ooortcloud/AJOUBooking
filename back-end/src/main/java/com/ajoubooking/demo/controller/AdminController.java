@@ -1,14 +1,17 @@
 package com.ajoubooking.demo.controller;
 
 import com.ajoubooking.demo.dto.admin.AdminDto;
+import com.ajoubooking.demo.dto.admin.ChangePwDto;
+import com.ajoubooking.demo.dto.admin.CheckPwDto;
 import com.ajoubooking.demo.service.AdminService;
 import jakarta.validation.Valid;
+import org.apache.tomcat.util.http.fileupload.RequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
 
 @Controller
 @RequestMapping("/login")  // 헤드 엔드포인트 설정
@@ -45,7 +48,6 @@ public class AdminController {
         // 계정 조회에 실패한 경우 돌려보냄
         boolean b = adminService.validateRequestLogin(dto.getPw());
         if(!b){
-            System.out.println("계정 조회 오류");
             bindingResult.rejectValue("pw", null, "pw 입력이 잘못되었습니다.");
             /**
              * bindingResult.rejectValue()  << 필드 에러
@@ -63,17 +65,53 @@ public class AdminController {
         return "adminMain";
     }
 
-    @GetMapping("/changePw")
+    @GetMapping("/beforeChangePw")
     public String checkPw(Model model) {
-        model.addAttribute("dto", AdminDto.builder().build());
-        return "changePw";
+        // 이전에 쓴 model 키값과 다른 이름으로 선언해줘야 thymeleaf에서 혼선을 일으키지 않는다.
+        model.addAttribute("beforeDto", CheckPwDto.builder().build());
+        return "beforeChangePw";
     }
 
-    @PostMapping("/changePw")
-    public String changePw(@Valid @ModelAttribute("dto") AdminDto dto, BindingResult bindingResult) {
+    /**
+     * 비밀번호 변경 전 현재 실제 관리자가 제어하는 것이 맞는지 재확인하는 메소드.
+     * @param beforeDto  : 앞서 model 키값을 변경했으니, 여기서도 동일한 값으로 파라미터명을 변경해줘야 modelAttirubute가 제대로 적용됨.
+     */
+    @PostMapping("/beforeChangePw")
+    public String checkPwValidation(@Valid @ModelAttribute("beforeDto") CheckPwDto beforeDto, BindingResult bindingResult) {
 
-        if(true)
-            return "adminMain";
-        return "changePw";
+        if(bindingResult.hasErrors()){
+            return "beforeChangePw";
+        }
+
+        if(!adminService.validateRequestLogin(beforeDto.getInputPw())) {
+            bindingResult.rejectValue("inputPw", null, "pw 입력이 잘못되었습니다.");
+            return "beforeChangePw";
+        }
+
+        return "redirect:./afterChangePw";
+    }
+
+    @GetMapping("/afterChangePw")
+    public String changePw(Model model) {
+        model.addAttribute("afterDto", ChangePwDto.builder().build());
+        return "afterChangePw";
+    }
+
+    @PostMapping("/afterChangePw")
+    public String changePwValidation(@Valid @ModelAttribute("afterDto") ChangePwDto afterDto, BindingResult bindingResult) {
+
+        if(bindingResult.hasErrors()){
+            return "afterChangePw";
+        }
+
+        // 두 입력값이 일치하지 않는 경우 예외처리
+        if(!afterDto.getInputB().equals(afterDto.getInputA())) {
+            bindingResult.rejectValue("inputB", null, "입력된 두 값이 서로 일치하지 않습니다.");
+            return "afterChangePw";
+        }
+
+        adminService.changePw(afterDto.getInputB());
+
+        return "successChangePw";
     }
 }

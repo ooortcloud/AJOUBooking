@@ -18,5 +18,8 @@ public class AdminService {
         return true;
     }
 
+    public void changePw(String newPw) {
+        adminRepository.updatePw(newPw);
+    }
 
 }
