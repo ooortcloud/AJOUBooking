@@ -1,12 +1,11 @@
-// App.js
 import React, { useState } from 'react';
 import './App.css'; // 스타일 파일 추가
-import Map from './Map.js'; // Map 컴포넌트 추가
+import Map from './Map'; // Map 컴포넌트 추가
 
 function App() {
   const [data, setData] = useState('');
   const [result, setResult] = useState(null);
-  const [showMap, setShowMap] = useState(false);  // Map 컴포넌트 노출 유무
+  const [mapData, setMapData] = useState(null);  // Map 컴포넌트 데이터 전달
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +18,7 @@ function App() {
 
     try {
       // 수정된 부분: GET 메소드 사용, 데이터는 URL에 쿼리 매개변수로 전달
-      const response = await fetch(`http://localhost:8080?callNumber=${encodeURIComponent(data)}`, {
+      const response = await fetch(`http://3.142.20.149:8080?callNumber=${encodeURIComponent(data)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -32,8 +31,13 @@ function App() {
 
       const resultData = await response.json();
       setResult(resultData);
-      setShowMap(true); // Map 컴포넌트를 표시
+
+      // 수정된 부분: Map 컴포넌트에 result 데이터 전달
+      setMapData(resultData);
       
+      // 수정된 부분: form-container의 style.display 속성을 none으로 설정 복사 문제 해결
+      document.querySelector('.form-container').style.display = 'none';
+    
     } catch (error) {
       console.error('Error:', error);
     }
@@ -59,20 +63,15 @@ function App() {
             />
             <button type="submit" className="btn btn-primary" id="hidden-btn">위치 검색</button>
           </form>
+          <div>
+          <a href="https://library.ajou.ac.kr/#/">도서관 홈페이지에서 '청구기호'를 확인하세요!</a>
         </div>
-       
+        </div>
         <div>
           {/* 결과 출력 */}
           {result && (
-            <div>
-              <p>"category" : "{result.category}"</p>
-              <p>"bookshelfNum" : "{result.bookshelfNum}"</p>
-              <p>"columnNum" : "{result.columnNum}"</p>
-            </div>
+            <Map mapData={result} />
           )}
-        </div>
-        <div>
-          <a href="https://library.ajou.ac.kr/#/">도서관 홈페이지에서 '청구기호'를 확인하세요!</a>
         </div>
       </div>
     </div>
@@ -80,3 +79,4 @@ function App() {
 }
 
 export default App;
+
