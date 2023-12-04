@@ -1,7 +1,7 @@
 package com.ajoubooking.demo.bookshelf;
 
 import com.ajoubooking.demo.domain.Bookshelf;
-import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
+import com.ajoubooking.demo.dto.home.ColumnAddressDto;
 import com.ajoubooking.demo.repository.BookshelfRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,12 +39,12 @@ public class BookshelfRepositoryTest {
         List<Bookshelf> bookshelfList = bookshelfRepository.findByStartCallNumberClassificationNumber(BigDecimal.valueOf(5.136));
         Bookshelf temp = bookshelfList.get(0);
 
-        ColumnAddressResponseDto testVal = ColumnAddressResponseDto.builder()
+        ColumnAddressDto testVal = ColumnAddressDto.builder()
                         .category(temp.getColumnAddress().getCategory())
                         .bookshelfNum(temp.getColumnAddress().getBookshelfNum())
                         .columnNum(temp.getColumnAddress().getColumnNum())
                         .build();
-        ColumnAddressResponseDto answer = ColumnAddressResponseDto.builder()
+        ColumnAddressDto answer = ColumnAddressDto.builder()
                 .category(0)
                 .bookshelfNum(5)
                 .columnNum(8)

@@ -1,9 +1,10 @@
 package com.ajoubooking.demo.controller.admin;
 
+import com.ajoubooking.demo.domain.Bookshelf;
 import com.ajoubooking.demo.dto.admin.ChangeColumnDto;
+import com.ajoubooking.demo.dto.home.ColumnAddressDto;
 import com.ajoubooking.demo.service.AdminService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,8 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/login")
 public class AdminColumnController {
 
-    @Autowired
-    private AdminService adminService;
+    private final AdminService adminService;
+
+    public AdminColumnController(AdminService adminService) {
+        this.adminService = adminService;
+    }
+
+    private static String inputCallNumber;
 
     @GetMapping("/column")
     public String changeColumn(Model model) {
@@ -31,6 +37,9 @@ public class AdminColumnController {
         if(bindingResult.hasErrors()) {
             return "/column/changeColumn";
         }
+        
+        // view로부터 입력받은 값을 클래스 단에 임시로 저장해두기 위함
+        inputCallNumber = columnDto.getInputCallNumber();
 
         return "redirect:./selectColumn";
     }
@@ -42,7 +51,16 @@ public class AdminColumnController {
     @GetMapping("/selectColumn")
     public String selectColumn(Model model) {
         // model.addAttribute("columnDto", ChangeColumnDto.builder().build());
+        Bookshelf temp = adminService.findPreviousBookshelfByCallNumber(inputCallNumber);
+        String previousCallNumber = temp.getStartCallNumber().getClassificationNumber() + temp.getStartCallNumber().getAuthorSymbol();
+        model.addAttribute("previous", previousCallNumber);
+        model.addAttribute("present", inputCallNumber);
 
+        model.addAttribute("next", adminService.findNextBookshelfByColumnAddressDto(ColumnAddressDto.builder()
+                        .category(temp.getColumnAddress().getCategory())
+                        .bookshelfNum(temp.getColumnAddress().getBookshelfNum())
+                        .columnNum(temp.getColumnAddress().getColumnNum())
+                        .build()));
         return "/column/selectChangeColumn";
     }
 
@@ -52,7 +70,19 @@ public class AdminColumnController {
             return "/column/selectChangeColumn";
         }
 
+        Bookshelf temp = adminService.findPreviousBookshelfByCallNumber(columnDto.getInputCallNumber());
+        try {
+            Bookshelf nextBookshelf = adminService.findNextBookshelfByColumnAddressDto(ColumnAddressDto.builder()
+                    .category(temp.getColumnAddress().getCategory())
+                    .bookshelfNum(temp.getColumnAddress().getBookshelfNum())
+                    .columnNum(temp.getColumnAddress().getColumnNum())
+                    .build());
+        } catch (IndexOutOfBoundsException e) {
+            // MVC 모델에서 어떻게 상태코드를 설정하고 에러 메세지를 전송하지??
+            return "";
+        }
 
+        return "/column/selectChangeColumn";
     }
 
 }

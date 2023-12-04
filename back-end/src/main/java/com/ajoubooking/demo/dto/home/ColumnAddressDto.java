@@ -1,10 +1,7 @@
 package com.ajoubooking.demo.dto.home;
 
-import com.ajoubooking.demo.domain.embed.ColumnAddress;
-import jakarta.persistence.Column;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /*
     출력 형식:
@@ -24,7 +21,7 @@ import lombok.NoArgsConstructor;
                 생성자를 가독성 있게 이용할 수 있게 도와줌.
                 @Builder를 사용하면 기본 생성자 생성을 보장함.
             */
-public class ColumnAddressResponseDto {
+public class ColumnAddressDto {
     private Integer category;  // 0
     private Integer bookshelfNum;  // 1
     private Integer columnNum;  // 2

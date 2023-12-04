@@ -1,9 +1,8 @@
 package com.ajoubooking.demo.service;
 
 import com.ajoubooking.demo.domain.Bookshelf;
-import com.ajoubooking.demo.domain.embed.ColumnAddress;
 import com.ajoubooking.demo.dto.home.CallNumberDto;
-import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
+import com.ajoubooking.demo.dto.home.ColumnAddressDto;
 import com.ajoubooking.demo.dto.home.SeparatedAuthorSymbolDto;
 import com.ajoubooking.demo.repository.BookshelfRepository;
 import org.springframework.stereotype.Service;
@@ -62,21 +61,52 @@ public class SearchService {
 
 
     // 분리된 청구기호를 바탕으로 이진탐색을 진행함
-    public Optional<ColumnAddressResponseDto> binarySearchForResponse(CallNumberDto callNumberDto) {
+    public Bookshelf binarySearch(CallNumberDto callNumberDto) {
 
         Bookshelf foundRow = bookshelfRepository
                 .findFirstByStartCallNumberClassificationNumberLessThanEqualOrderByStartCallNumberClassificationNumberDesc(callNumberDto.getClassificationNumber());
         if(foundRow == null)  // 예외처리
             throw new InputMismatchException("존재할 수 없는 행 위치");
 
-        List<Bookshelf> foundAuthorSymbols = bookshelfRepository.findByStartCallNumberClassificationNumber(
-                foundRow.getStartCallNumber().getClassificationNumber());
-
-            return binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundAuthorSymbols);
+        BigDecimal getClassificationNumber = foundRow.getStartCallNumber().getClassificationNumber();
+        List<Bookshelf> foundAuthorSymbols = bookshelfRepository.findByStartCallNumberClassificationNumber(getClassificationNumber);
+        String getAuthorSymbol = binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundAuthorSymbols);
+        return bookshelfRepository.findByCallNumberDto(getClassificationNumber, getAuthorSymbol);
     }
 
+    // ColumnAddress로 시작 청구기호를 조회
+    public Optional<Bookshelf> findByColumnAddress(ColumnAddressDto dto) {
+        Bookshelf temp = bookshelfRepository.findByColumnAddressDto(dto.getCategory(), dto.getBookshelfNum(), dto.getColumnNum());
+        return Optional.ofNullable(temp);
+    }
+
+    // 다음 카테고리 넘버를 조회
+    public Integer findNextCategory(Integer category) {
+        Bookshelf temp = bookshelfRepository.findFirstByColumnAddressCategoryGreaterThanOrderByColumnAddressCategory(category);
+        return temp.getColumnAddress().getCategory();
+    }
+
+    /*  메소드를 더 확장성있게 리팩터링하다보니 불필요한 코드였음. 메소드 수가 많아지더라도, 확장성 및 코드 효율성 등의 이유로 기능 단위로 쪼개는 것이 중요하다고 느낌.
+    // 위치를 리턴하기 위해 좌표값들을 조합
+    private ColumnAddressResponseDto buildBookshelfAuthorSymbolToColumnAddressResponse(
+            List<Bookshelf> bookshelfList, String answer) {
+        for (Bookshelf bookshelf : bookshelfList) {
+            if(bookshelf.getStartCallNumber().getAuthorSymbol().contains(answer)) {
+                return ColumnAddressResponseDto.builder()
+                        .category(bookshelf.getColumnAddress().getCategory())
+                        .bookshelfNum(bookshelf.getColumnAddress().getBookshelfNum())
+                        .columnNum(bookshelf.getColumnAddress().getColumnNum())
+                        .build();
+            }
+        }
+
+        return null;
+    }
+
+     */
+
     // 저자기호는 문자와 숫자의 조합이기에, 한번 더 쪼개서 순서를 비교해야 함.
-    private Optional<ColumnAddressResponseDto> binarySearchForAuthor(String key, List<Bookshelf> foundAuthorSymbols) {
+    private String binarySearchForAuthor(String key, List<Bookshelf> foundAuthorSymbols) {
 
         int lowIndex = 0;
         int highIndex = foundAuthorSymbols.size() - 1;
@@ -197,28 +227,17 @@ public class SearchService {
         // 최종적으로 결정된 조각들을 전부 조합
         String answer = setAuthorInit + String.valueOf(setNum) + setBookInit;
 
+        return answer;
+
+        /*
         // body에 채워넣을 객체값 만들기
         ColumnAddressResponseDto result = buildBookshelfAuthorSymbolToColumnAddressResponseDto(foundAuthorSymbols, answer);
         if (result == null)
             return Optional.empty();
         else
             return Optional.of(result);
-    }
 
-    // 최종적으로 위치를 리턴하기 위해 좌표값들을 조합해주는 헬퍼 메서드
-    private ColumnAddressResponseDto buildBookshelfAuthorSymbolToColumnAddressResponseDto(
-            List<Bookshelf> bookshelfList, String answer) {
-        for (Bookshelf bookshelf : bookshelfList) {
-            if(bookshelf.getStartCallNumber().getAuthorSymbol().contains(answer)) {
-                return ColumnAddressResponseDto.builder()
-                        .category(bookshelf.getColumnAddress().getCategory())
-                        .bookshelfNum(bookshelf.getColumnAddress().getBookshelfNum())
-                        .columnNum(bookshelf.getColumnAddress().getColumnNum())
-                        .build();
-            }
-        }
-
-        return null;
+         */
     }
 
     // 저자기호를 분리해주는 헬퍼 메소드

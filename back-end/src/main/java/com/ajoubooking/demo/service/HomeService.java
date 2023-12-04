@@ -1,7 +1,8 @@
 package com.ajoubooking.demo.service;
 
+import com.ajoubooking.demo.domain.Bookshelf;
 import com.ajoubooking.demo.dto.home.CallNumberDto;
-import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
+import com.ajoubooking.demo.dto.home.ColumnAddressDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +22,12 @@ public class HomeService {
         return searchService.separateRequestCallNumber(callNumber);
     }
 
-    public Optional<ColumnAddressResponseDto> binarySearchForResponse(CallNumberDto requestedCallNumber) {
-        return searchService.binarySearchForResponse(requestedCallNumber);
+    public Optional<ColumnAddressDto> binarySearchForResponse(CallNumberDto requestedCallNumber) {
+        Bookshelf ans = searchService.binarySearch(requestedCallNumber);
+        return Optional.of(ColumnAddressDto.builder()
+                        .category(ans.getColumnAddress().getCategory())
+                        .bookshelfNum(ans.getColumnAddress().getBookshelfNum())
+                        .columnNum(ans.getColumnAddress().getColumnNum())
+                        .build());
     }
 }

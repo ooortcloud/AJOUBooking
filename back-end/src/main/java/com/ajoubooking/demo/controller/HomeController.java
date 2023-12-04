@@ -1,7 +1,7 @@
 package com.ajoubooking.demo.controller;
 
 import com.ajoubooking.demo.dto.home.CallNumberDto;
-import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
+import com.ajoubooking.demo.dto.home.ColumnAddressDto;
 import com.ajoubooking.demo.service.HomeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,8 +20,8 @@ class HomeController {
 
     // POST로 값을 입력받으면 DB 데이터를 바탕으로 로직으로 처리해서 Front서버에 반환
     @GetMapping("")
-    public ResponseEntity<ColumnAddressResponseDto> response(@RequestParam(value = "callNumber") String callNumber) {
-        Optional<ColumnAddressResponseDto> responseDto;
+    public ResponseEntity<ColumnAddressDto> response(@RequestParam(value = "callNumber") String callNumber) {
+        Optional<ColumnAddressDto> responseDto;
         try {
             CallNumberDto requestedCallNumber = homeService.separateRequestCallNumber(callNumber);
             responseDto = homeService.binarySearchForResponse(requestedCallNumber);
