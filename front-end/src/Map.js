@@ -1,48 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import $ from 'jquery';
-import 'magnific-popup/dist/magnific-popup.css';
 import './Map.css';
 
 const Map = ({ mapData }) => {
   const canvasRef = useRef(null);
-  const initializeMagnificPopup = () => {
-    // jQuery 대신 $ 사용
-    if (window.jQuery) {
-      window.jQuery.magnificPopup.open({
-        items: {
-          src: '/map.png',
-          type: 'image',
-        },
-        closeBtnInside: false,
-        mainClass: 'mfp-fade mfp-align-center-horizontally mfp-align-center-vertically',
-        closeOnBgClick: false,
-        closeOnContentClick: false,
-        closeOnEsc: false,
-        fixedContentPos: false,
-        overflowY: 'auto',
-        scrollOutside: false,
-        zoom: {
-          enabled: true,
-          easing: 'ease-in-out',
-          duration: 250,
-        },
-        callbacks: {
-          beforeOpen: () => {
-            $('body').css('background-color', 'rgba(0, 0, 0, 0.5)');
-          },
-          afterClose: () => {
-            $('body').css('background-color', 'white');
-            $('body').css('overflow', 'auto');
-          },
-        },
-      });
-    } else {
-      console.error('jQuery is not available.');
-    }
-  };
-  useEffect(() => {
-    
 
+  useEffect(() => {
     const drawRedDotOnCanvas = (img, coordinates) => {
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
@@ -53,10 +15,18 @@ const Map = ({ mapData }) => {
         const ratioX = canvas.width / img.width;
         const ratioY = canvas.height / img.height;
 
+        // 그림 그리기
         context.fillStyle = 'red';
         context.beginPath();
         context.arc(coordinates.x * ratioX, coordinates.y * ratioY, 5, 0, 2 * Math.PI);
         context.fill();
+
+        // 붉은색 고리 추가
+        context.strokeStyle = 'red';
+        context.lineWidth = 20;
+        context.beginPath();
+        context.arc(coordinates.x * ratioX, coordinates.y * ratioY, 100, 0, 2 * Math.PI);
+        context.stroke();
 
         const x = coordinates.x * ratioX;
         const y = coordinates.y * ratioY;
@@ -82,7 +52,7 @@ const Map = ({ mapData }) => {
         console.log('Computed Coordinates:', coordinates);
 
         drawRedDotOnCanvas(img, coordinates);
-        initializeMagnificPopup(); // 이미지가 로드된 후 팝업 열기
+        // magnific-popup 관련 코드 제외
       };
     }
   }, [mapData]);
@@ -105,15 +75,7 @@ const Map = ({ mapData }) => {
 
   return (
     <div style={{ position: 'relative' }}>
-      {/* 팝업 열기 위한 커스텀 링크 */}
-      <div className="popup-link" onClick={() => initializeMagnificPopup()}>
         <img id="book-map" src="/map.png" alt="Map" />
-      </div>
-
-      {/* 버튼을 클릭하여 팝업 열기 */}
-      <button className="open-popup-button" onClick={() => initializeMagnificPopup()}>
-        Open Map
-      </button>
 
       {mapData && (
         <div>
