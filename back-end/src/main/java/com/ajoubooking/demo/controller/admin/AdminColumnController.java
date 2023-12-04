@@ -51,16 +51,20 @@ public class AdminColumnController {
     @GetMapping("/selectColumn")
     public String selectColumn(Model model) {
         // model.addAttribute("columnDto", ChangeColumnDto.builder().build());
-        Bookshelf temp = adminService.findPreviousBookshelfByCallNumber(inputCallNumber);
-        String previousCallNumber = temp.getStartCallNumber().getClassificationNumber() + temp.getStartCallNumber().getAuthorSymbol();
+        Bookshelf tempPrevious = adminService.findPreviousBookshelfByCallNumber(inputCallNumber);
+        String previousCallNumber = tempPrevious.getStartCallNumber().getClassificationNumber() + " " + tempPrevious.getStartCallNumber().getAuthorSymbol();
         model.addAttribute("previous", previousCallNumber);
         model.addAttribute("present", inputCallNumber);
 
-        model.addAttribute("next", adminService.findNextBookshelfByColumnAddressDto(ColumnAddressDto.builder()
-                        .category(temp.getColumnAddress().getCategory())
-                        .bookshelfNum(temp.getColumnAddress().getBookshelfNum())
-                        .columnNum(temp.getColumnAddress().getColumnNum())
-                        .build()));
+        Bookshelf tempNext = adminService.findNextBookshelfByColumnAddressDto(ColumnAddressDto.builder()
+                .category(tempPrevious.getColumnAddress().getCategory())
+                .bookshelfNum(tempPrevious.getColumnAddress().getBookshelfNum())
+                .columnNum(tempPrevious.getColumnAddress().getColumnNum())
+                .build());
+        String nextCallNumber = tempNext.getStartCallNumber().getClassificationNumber() + " " + tempNext.getStartCallNumber().getAuthorSymbol();
+
+
+        model.addAttribute("next", nextCallNumber);
         return "/column/selectChangeColumn";
     }
 
