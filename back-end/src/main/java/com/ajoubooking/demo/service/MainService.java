@@ -61,8 +61,20 @@ public class MainService {
 
         Bookshelf foundRow = bookshelfRepository
                 .findFirstByStartCallNumberClassificationNumberLessThanEqualOrderByStartCallNumberClassificationNumberDesc(callNumberDto.getClassificationNumber());
-        if(foundRow == null)  // 예외처리
-            throw new InputMismatchException("존재할 수 없는 행 위치입니다.");
+
+        // 도서관 내 가장 작은 청구기호보다 작은 값을 입력했을 때 예외처리
+        if(foundRow == null)
+            throw new InputMismatchException("존재할 수 없는 서적입니다. 만약 존재하는 서적이라면 관리자에게 문의해주세요.");
+
+        /**
+         *  입력된 청구기호의 분류번호가 조회된 row 중 가장 큰 분류번호와 일치할 때 예외처리:
+         *  1) 입력된 분류번호 값과 first가 서로 동일한 경우를 분기문으로 처리
+         *  2) 분류번호가 first인 boolshelf 중 맨 처음 column인 bookshelf를 가져옴.
+         *  3) 분류번호가  second인 bookshelf들 중에서, 가장 마지막 column인 bookshelf를 가져옴.
+         *  4) 만약 저 두 bookshelf 사이에 입력된 청구기호가 들어간다면, 해당 서적은 반드시 3)에 해당하는 column에 존재함.
+         *  5) 그렇지 않다면, 분류번호값이 first인 것들 중에 대해 기존 조회 로직으로 재탐색.
+         */
+
         
         List<Bookshelf> foundAuthorSymbols = bookshelfRepository.findByStartCallNumberClassificationNumber(
                 foundRow.getStartCallNumber().getClassificationNumber());
