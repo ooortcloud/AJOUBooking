@@ -1,11 +1,11 @@
 package com.ajoubooking.demo.service;
 
 import com.ajoubooking.demo.domain.Bookshelf;
-import com.ajoubooking.demo.domain.embed.ColumnAddress;
 import com.ajoubooking.demo.dto.home.CallNumberDto;
 import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
 import com.ajoubooking.demo.dto.home.SeparatedAuthorSymbolDto;
-import com.ajoubooking.demo.repository.BookshelfRepository;
+import com.ajoubooking.demo.repository.bookshelf.BookshelfDataRepository;
+import com.ajoubooking.demo.repository.bookshelf.BookshelfRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,13 +58,11 @@ public class MainService {
     }
 
     public Optional<ColumnAddressResponseDto> binarySearchForResponse(CallNumberDto callNumberDto) {
-
+        /*  예외처리를 못하는 코드라 제거함
         Bookshelf foundRow = bookshelfRepository
                 .findFirstByStartCallNumberClassificationNumberLessThanEqualOrderByStartCallNumberClassificationNumberDesc(callNumberDto.getClassificationNumber());
 
-        // 도서관 내 가장 작은 청구기호보다 작은 값을 입력했을 때 예외처리
-        if(foundRow == null)
-            throw new InputMismatchException("존재할 수 없는 서적입니다. 만약 존재하는 서적이라면 관리자에게 문의해주세요.");
+         */
 
         /**
          *  입력된 청구기호의 분류번호가 조회된 row 중 가장 큰 분류번호와 일치할 때 예외처리:
@@ -74,9 +72,17 @@ public class MainService {
          *  4) 만약 저 두 bookshelf 사이에 입력된 청구기호가 들어간다면, 해당 서적은 반드시 3)에 해당하는 column에 존재함.
          *  5) 그렇지 않다면, 분류번호값이 first인 것들 중에 대해 기존 조회 로직으로 재탐색.
          */
+        List<Bookshelf> foundRows = bookshelfRepository.findTopTwoLessThanEqualClassificationNumber(callNumberDto.getClassificationNumber());
 
+        // 도서관 내 가장 작은 청구기호보다 작은 값을 입력했을 때 예외처리
+        if(foundRows.isEmpty())
+            throw new InputMismatchException("존재할 수 없는 서적입니다. 만약 존재하는 서적이라면 관리자에게 문의해주세요.");
+
+        if(foundRows.get(0).getStartCallNumber().getClassificationNumber() == callNumberDto.getClassificationNumber()) {
+
+        }
         
-        List<Bookshelf> foundAuthorSymbols = bookshelfRepository.findByStartCallNumberClassificationNumber(
+        List<Bookshelf> foundAuthorSymbols = bookshelfDataRepository.findByStartCallNumberClassificationNumber(
                 foundRow.getStartCallNumber().getClassificationNumber());
         /*  이 분기문을 넣어버리면 오히려 예외처리를 안하게 되어버림.
         // 결과값이 1개뿐이어서 이진탐색을 할 필요가 없는 경우
@@ -91,7 +97,7 @@ public class MainService {
         else
 
          */
-            return binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundAuthorSymbols);
+        return binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundAuthorSymbols);
     }
 
     private Optional<ColumnAddressResponseDto> binarySearchForAuthor(String key, List<Bookshelf> foundAuthorSymbols) {

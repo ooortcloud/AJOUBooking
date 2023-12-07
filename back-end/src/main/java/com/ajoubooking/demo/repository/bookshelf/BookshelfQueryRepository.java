@@ -1,5 +1,6 @@
-package com.ajoubooking.demo.repository;
+package com.ajoubooking.demo.repository.bookshelf;
 
+import com.ajoubooking.demo.domain.Bookshelf;
 import com.ajoubooking.demo.domain.QBookshelf;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,6 @@ import java.util.List;
 import static com.ajoubooking.demo.domain.QBookshelf.bookshelf;
 
 @Repository
-@Transactional
 public class BookshelfQueryRepository {
     private JPAQueryFactory queryFactory;
 
@@ -20,9 +20,12 @@ public class BookshelfQueryRepository {
     }
 
 
-    public List<BigDecimal> findTopTwoLessThanClassificationNumber(BigDecimal classificationNum) {
-        return queryFactory.selectFrom(bookshelf)
-                .
+    public List<Bookshelf> findTopTwoLessThanEqualClassificationNumber(BigDecimal classificationNum) {
+        return queryFactory.selectDistinct(bookshelf)
+                .from(bookshelf)
+                .where(bookshelf.startCallNumber.classificationNumber.loe(classificationNum))
+                .orderBy(bookshelf.startCallNumber.classificationNumber.desc())
+                .limit(2)
+                .fetch();
     }
-
 }
