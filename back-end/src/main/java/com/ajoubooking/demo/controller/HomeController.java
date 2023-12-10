@@ -23,7 +23,7 @@ class HomeController {
     // 값을 입력받으면 DB 데이터를 바탕으로 로직으로 처리해서 Front서버에 반환
     @GetMapping("")
     public ResponseEntity<ColumnAddressResponseDto> response(@RequestParam(value = "callNumber") String callNumber) {
-        Optional<ColumnAddressResponseDto> responseDto;
+
 
         // 예외를 컨트롤러 밖으로 던지기 위해 일부로 예외처리 안함
         /*
@@ -36,13 +36,16 @@ class HomeController {
 
          */
         CallNumberDto requestedCallNumber = mainService.separateRequestCallNumber(callNumber);
-        responseDto = mainService.binarySearchForResponse(requestedCallNumber);
-        if(responseDto.isPresent())
-            return ResponseEntity.ok(responseDto.get());
+        ColumnAddressResponseDto responseDto = mainService.binarySearchForResponse(requestedCallNumber);
+        return ResponseEntity.ok(responseDto);
+        
+        /* 마지막에서 절대 예외가 발생할 수가 없다. 앞에서 예외처리 다 해뒀기 때문.
         else{
             System.out.println("내부 이진 탐색 연산이 잘못됨...");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+         */
     }
 
 }

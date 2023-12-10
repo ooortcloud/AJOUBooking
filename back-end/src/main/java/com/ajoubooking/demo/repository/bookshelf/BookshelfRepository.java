@@ -20,7 +20,17 @@ public class BookshelfRepository {
         return bookshelfDataRepository.findByStartCallNumberClassificationNumber(classificationNumber);
     }
 
+    // 아마 안쓸듯.
     public List<Bookshelf> findTopTwoLessThanEqualClassificationNumber(BigDecimal classificationNumber) {
         return bookshelfQueryRepository.findTopTwoLessThanEqualClassificationNumber(classificationNumber);
+    }
+
+    public BigDecimal findTopClassificationNumberLessThanEqualOrderByDesc(BigDecimal classificationNum) {
+        Bookshelf temp = bookshelfDataRepository.findFirstByStartCallNumberClassificationNumberLessThanEqualOrderByStartCallNumberClassificationNumberDesc(classificationNum);
+        return temp.getStartCallNumber().getClassificationNumber();
+    }
+
+    public Bookshelf findTopClassificationNumberLessThanOrderByDesc(BigDecimal classificationNum) {
+        return bookshelfDataRepository.findFirstByStartCallNumberClassificationNumberLessThanOrderByStartCallNumberClassificationNumberDesc(classificationNum);
     }
 }

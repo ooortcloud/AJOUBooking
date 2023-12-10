@@ -49,7 +49,7 @@ public class MainServiceTest {
     @Test
     @DisplayName("Service 이진탐색 전체 테스트")  // 값만 비교했을 때 성공
     void binarySearchForResponseTest() {
-        Optional<ColumnAddressResponseDto> result = mainService.binarySearchForResponse(CallNumberDto.builder()
+       ColumnAddressResponseDto result = mainService.binarySearchForResponse(CallNumberDto.builder()
                 .classificationNumber(BigDecimal.valueOf(5.8))
                 .authorSymbol("B187hK한")
                 .build());
@@ -60,7 +60,7 @@ public class MainServiceTest {
                 .columnNum(11)
                 .build();
 
-        assertThat(result.get()).usingRecursiveComparison().isEqualTo(answer);
+        assertThat(result).usingRecursiveComparison().isEqualTo(answer);
     }
 
     /*

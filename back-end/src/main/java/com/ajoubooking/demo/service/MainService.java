@@ -4,16 +4,12 @@ import com.ajoubooking.demo.domain.Bookshelf;
 import com.ajoubooking.demo.dto.home.CallNumberDto;
 import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
 import com.ajoubooking.demo.dto.home.SeparatedAuthorSymbolDto;
-import com.ajoubooking.demo.repository.bookshelf.BookshelfDataRepository;
 import com.ajoubooking.demo.repository.bookshelf.BookshelfRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional  // 프록시 객체를 생성하여 자동 commit, rollback 등의 트랜잭션 처리
@@ -57,51 +53,39 @@ public class MainService {
         return callNumberDto;
     }
 
-    public Optional<ColumnAddressResponseDto> binarySearchForResponse(CallNumberDto callNumberDto) {
-        /*  예외처리를 못하는 코드라 제거함
-        Bookshelf foundRow = bookshelfRepository
-                .findFirstByStartCallNumberClassificationNumberLessThanEqualOrderByStartCallNumberClassificationNumberDesc(callNumberDto.getClassificationNumber());
-
-         */
+    public ColumnAddressResponseDto binarySearchForResponse(CallNumberDto callNumberDto) {
 
         /**
-         *  입력된 청구기호의 분류번호가 조회된 row 중 가장 큰 분류번호와 일치할 때 예외처리:
-         *  1) 입력된 분류번호 값과 first가 서로 동일한 경우를 분기문으로 처리
-         *  2) 분류번호가 first인 boolshelf 중 맨 처음 column인 bookshelf를 가져옴.
-         *  3) 분류번호가  second인 bookshelf들 중에서, 가장 마지막 column인 bookshelf를 가져옴.
-         *  4) 만약 저 두 bookshelf 사이에 입력된 청구기호가 들어간다면, 해당 서적은 반드시 3)에 해당하는 column에 존재함.
-         *  5) 그렇지 않다면, 분류번호값이 first인 것들 중에 대해 기존 조회 로직으로 재탐색.
+         * 알고리즘 리메이크
+         * 1) 입력된 분류번호와 작거나 같은 분류번호 중 가장 큰 분류번호를 read
+         * 2) 조회된 분류번호에 해당하는 모든 bookshelf들을 read
+         * 3) 해당 bookshelf 리스트에 대해 입력된 저자번호에 대해서 이진탐색
+         * 3-1) 이진탐색으로 선별된 column값이 정답.
+         * 4-1) 만약 이진탐색으로 선별된 값이 없다면 입력된 저자번호가 가장 작은 저자번호보다 작다는 것이므로, 현재 분류번호보다 하나 앞선 bookshelf들을 read
+         * 4-2) 해당 bookshelf 리스트 중 가장 끝에 있는 column값이 반드시 정답.
          */
-        List<Bookshelf> foundRows = bookshelfRepository.findTopTwoLessThanEqualClassificationNumber(callNumberDto.getClassificationNumber());
+        BigDecimal temp = bookshelfRepository.findTopClassificationNumberLessThanEqualOrderByDesc(callNumberDto.getClassificationNumber());
+        List<Bookshelf> foundRows = bookshelfRepository.findByClassificationNumber(temp);
 
         // 도서관 내 가장 작은 청구기호보다 작은 값을 입력했을 때 예외처리
         if(foundRows.isEmpty())
             throw new InputMismatchException("존재할 수 없는 서적입니다. 만약 존재하는 서적이라면 관리자에게 문의해주세요.");
 
-        if(foundRows.get(0).getStartCallNumber().getClassificationNumber() == callNumberDto.getClassificationNumber()) {
+        Optional<ColumnAddressResponseDto> tempResult = binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundRows);
 
-        }
-        
-        List<Bookshelf> foundAuthorSymbols = bookshelfDataRepository.findByStartCallNumberClassificationNumber(
-                foundRow.getStartCallNumber().getClassificationNumber());
-        /*  이 분기문을 넣어버리면 오히려 예외처리를 안하게 되어버림.
-        // 결과값이 1개뿐이어서 이진탐색을 할 필요가 없는 경우
-        if (foundAuthorSymbols.size() == 1) {
-            ColumnAddress answer = foundAuthorSymbols.get(0).getColumnAddress();
-            return Optional.of(ColumnAddressResponseDto.builder()
-                    .category(answer.getCategory())
-                    .bookshelfNum(answer.getBookshelfNum())
-                    .columnNum(answer.getColumnNum())
-                    .build());
-        }
-        else
-
+        /**
+         *  예외가 터졌으면 예외 케이스 처리 로직 실행.
+         *  그렇지 않으면 정답 column을 리턴.
          */
-        return binarySearchForAuthor(callNumberDto.getAuthorSymbol(), foundAuthorSymbols);
+        if(tempResult.isEmpty()) {
+            ColumnAddressResponseDto ans = catchExceptionCase(callNumberDto.getClassificationNumber());
+            return ans;
+        } else {
+            return tempResult.get();
+        }
     }
 
     private Optional<ColumnAddressResponseDto> binarySearchForAuthor(String key, List<Bookshelf> foundAuthorSymbols) {
-
         int lowIndex = 0;
         int highIndex = foundAuthorSymbols.size() - 1;
         Integer midIndex = null;
@@ -113,12 +97,21 @@ public class MainService {
         }
 
         SeparatedAuthorSymbolDto separatedKeyAuthorSymbol = separateAuthorSymbol(key);
+        SeparatedAuthorSymbolDto getFirst = separatedAuthorSymbols.get(0);
+
+        /**
+         *  청구기호와 컴퓨터의 영어, 한글 대소관계가 정반대라서 각 케이스에 대한 처리가 필요
+         *
+         * @return : 만약 가장 작은 저자기호보다 입력된 저자기호가 더 작으면 예외처리.
+         */
+        boolean empty = checkExceptionCase(separatedKeyAuthorSymbol, getFirst);
+        if (empty == false) return Optional.empty();
 
         // 1차 : 저자 초성에 대해 이진탐색
         Character myKey = separatedKeyAuthorSymbol.getAuthorInitialConsonant();
         Character myMid = null;
-        boolean keyIsKorean = true;
-        boolean midIsKorean = true;
+        boolean keyIsKorean;
+        boolean midIsKorean;
         while(lowIndex <= highIndex) {
             midIndex = (lowIndex + highIndex) / 2;
             myMid = separatedAuthorSymbols.get(midIndex).getAuthorInitialConsonant();
@@ -128,13 +121,12 @@ public class MainService {
             else keyIsKorean = true;
             if('A' <= myMid && myMid <= 'z') midIsKorean = false;
             else midIsKorean = true;
+
             if(keyIsKorean && !midIsKorean) {  // key < mid
                 highIndex = midIndex - 1;
             } else if (!keyIsKorean && midIsKorean) {  // key > mid
                 lowIndex = midIndex + 1;
-            }
-
-            else {
+            } else {
                 if(myKey < myMid) {
                     highIndex = midIndex - 1;
                 } else if (myKey > myMid) {
@@ -173,7 +165,7 @@ public class MainService {
         } else if (temp.size() == 1) {
             midIndex = 0;
         } else {
-            System.exit(-1);  // 값이 없는 건 DB에 접근하지 못했을 때 뿐임. 심각한 에러라는 것.
+            throw new EmptyStackException(); // 값이 없는 건 DB에 접근하지 못했을 때 뿐임. 심각한 에러라는 것.
         }
         Integer setNum = temp.get(midIndex).getNumber();
 
@@ -191,6 +183,7 @@ public class MainService {
             while (lowIndex <= highIndex) {
                 midIndex = (lowIndex + highIndex) / 2;
                 myMid = temp2.get(midIndex).getBookInitialConsonant();
+
                 if('A' <= myKey && myKey <= 'z') keyIsKorean = false;
                 else keyIsKorean = true;
                 if('A' <= myMid && myMid <= 'z') midIsKorean = false;
@@ -214,11 +207,11 @@ public class MainService {
         } else if(temp2.size() == 1) {
             midIndex = 0;
         } else{
-            System.exit(-1);
+            throw new EmptyStackException();
         }
         Character setBookInit = temp2.get(midIndex).getBookInitialConsonant();
 
-        // 최종적으로 결정된 조각들을 전부 조합
+        // 최종적으로 결정된 조각들을 전부 조합. 한정된 리스트 내의 값들을 조합했기에, 예외만 터지지 않으면 반드시 일치하는 row가 존재하게 됨.
         String answer = setAuthorInit + String.valueOf(setNum) + setBookInit;
 
         // body에 채워넣을 객체값 만들기
@@ -227,6 +220,56 @@ public class MainService {
             return Optional.empty();
         else
             return Optional.of(result);
+    }
+
+    private static boolean checkExceptionCase(SeparatedAuthorSymbolDto myKey, SeparatedAuthorSymbolDto getFirst) {
+        boolean firstIsKorean;
+        boolean keyIsKorean;
+        
+        // 1차 비교
+        if('A' <= myKey.getAuthorInitialConsonant() && myKey.getAuthorInitialConsonant() <= 'z') keyIsKorean = false;
+        else keyIsKorean = true;
+        if('A' <= getFirst.getAuthorInitialConsonant() && getFirst.getAuthorInitialConsonant() <= 'z') firstIsKorean = false;
+        else firstIsKorean = true;
+        if(keyIsKorean && !firstIsKorean) {  // key < first
+            return false;  // 무조건 예외임
+        } else if (!keyIsKorean && firstIsKorean) {  // key > first
+            return true;  // 무조건 예외 아님
+        } else {
+            if(myKey.getAuthorInitialConsonant() < getFirst.getAuthorInitialConsonant()) {  // key < first
+                return false;
+            } else if (myKey.getAuthorInitialConsonant() > getFirst.getAuthorInitialConsonant()) {
+                return true;
+            } else {
+                // 아무것도 하지 않고 넘김
+            }
+        }
+        
+        // 2차 비교
+        if(myKey.getNumber() < getFirst.getNumber()) {  // key < first
+            return false;
+        } else if(myKey.getNumber() > getFirst.getNumber()) {
+            return true;
+        } else {
+            // 아무것도 하지 않고 넘김
+        }
+
+        // 3차 비교
+        if('A' <= myKey.getBookInitialConsonant() && myKey.getBookInitialConsonant() <= 'z') keyIsKorean = false;
+        else keyIsKorean = true;
+        if('A' <= getFirst.getBookInitialConsonant() && getFirst.getBookInitialConsonant() <= 'z') firstIsKorean = false;
+        else firstIsKorean = true;
+        if(keyIsKorean && !firstIsKorean) {  // key < first
+            return false;
+        } else if (!keyIsKorean && firstIsKorean) {  // key > first
+            // 아무것도 하지 않고 넘김. 정반대인 대소관계를 처리하기 위해서는 이 else if 문이 기능은 없어도 반드시 있어야 함.
+        } else {
+            if(myKey.getBookInitialConsonant() < getFirst.getBookInitialConsonant()) {  // key < first
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private ColumnAddressResponseDto buildBookshelfAuthorSymbolToColumnAddressResponseDto(
@@ -277,5 +320,14 @@ public class MainService {
         } catch (Exception e) {
             throw new InputMismatchException("저자기호 입력 양식이 잘못되었습니다.");
         }
+    }
+
+    private ColumnAddressResponseDto catchExceptionCase(BigDecimal classificationNumber) {
+        Bookshelf ans = bookshelfRepository.findTopClassificationNumberLessThanOrderByDesc(classificationNumber);
+        return ColumnAddressResponseDto.builder()
+                .category(ans.getColumnAddress().getCategory())
+                .bookshelfNum(ans.getColumnAddress().getBookshelfNum())
+                .columnNum(ans.getColumnAddress().getColumnNum())
+                .build();
     }
 }
