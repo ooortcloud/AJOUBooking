@@ -13,9 +13,11 @@ public interface BookshelfDataRepository extends JpaRepository<Bookshelf, Long> 
     //  입력된 값보다 작거나 같은 값 중 DB 상에서 가장 큰 값을 리턴.
     Bookshelf findFirstByStartCallNumberClassificationNumberLessThanEqualOrderByStartCallNumberClassificationNumberDesc(BigDecimal classificationNumber);
 
-    //  예외처리를 위한 조회
+    /**
+     *  예외처리를 위한 조회
+     *  id 순으로 정렬되도록 하면 구현 난이도가 크게 감소하지만, 추후 유지보수를 위해서 id 외 field값으로 정렬하기로 함
+      */
     Bookshelf findFirstByStartCallNumberClassificationNumberLessThanOrderByStartCallNumberClassificationNumberDesc(BigDecimal classificationNumber);
-
 
     /**
      *  "Entity 필드명 + Embedded 필드명" 순차적으로 선언

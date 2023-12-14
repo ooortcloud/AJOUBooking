@@ -9,7 +9,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://3.142.20.149:3000");  // 해당 포트 CORS 문제 해결
+                .allowedOrigins("http://3.142.20.149:3000", "http://localhost:3000");  // 해당 포트 CORS 문제 해결
 
     }
 }

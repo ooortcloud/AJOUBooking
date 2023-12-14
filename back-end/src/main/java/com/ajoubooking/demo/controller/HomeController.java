@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.InputMismatchException;
 import java.util.Optional;
 
-// @CrossOrigin(origins = "http://localhost:3000/*")  // CORS 해결 어노테이션
+// @CrossOrigin(origins = "http://localhost:3000/*")  // CORS 해결 어노테이션  << config 클래스에서 공통처리시키도록 변경
 @RestController  // 자바 객체를 HttpResponse의 본문 내용과 매핑해줌
 class HomeController {
 
@@ -23,8 +23,6 @@ class HomeController {
     // 값을 입력받으면 DB 데이터를 바탕으로 로직으로 처리해서 Front서버에 반환
     @GetMapping("")
     public ResponseEntity<ColumnAddressResponseDto> response(@RequestParam(value = "callNumber") String callNumber) {
-
-
         // 예외를 컨트롤러 밖으로 던지기 위해 일부로 예외처리 안함
         /*
         try {
@@ -33,7 +31,6 @@ class HomeController {
             System.out.println(LocalDate.now() + " >> " +  e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
          */
         CallNumberDto requestedCallNumber = mainService.separateRequestCallNumber(callNumber);
         ColumnAddressResponseDto responseDto = mainService.binarySearchForResponse(requestedCallNumber);
