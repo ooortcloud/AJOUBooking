@@ -8,5 +8,5 @@ import lombok.Getter;
 public class SeparatedAuthorSymbolDto {
     private Character authorInitialConsonant;  // D
     private Integer number;  // 262 (최대 3자리)
-    private Character bookInitialConsonant;  // 어
+    private String bookInitialConsonant;  // 어
 }

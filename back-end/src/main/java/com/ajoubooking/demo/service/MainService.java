@@ -87,11 +87,7 @@ public class MainService {
     }
 
     private Optional<ColumnAddressResponseDto> binarySearchForAuthor(String key, List<Bookshelf> foundAuthorSymbols) {
-        int lowIndex = 0;
-        int highIndex = foundAuthorSymbols.size() - 1;
-        Integer midIndex = null;
-
-        // 섹션 별로 효율적인 이진탐색을 진행하기 위해 조회된 모든 row에 대해 저자기호를 전부 분리함
+         // 섹션 별로 효율적인 이진탐색을 진행하기 위해 조회된 모든 row에 대해 저자기호를 전부 분리함
         List<SeparatedAuthorSymbolDto> separatedAuthorSymbols = new ArrayList<>();
         for (Bookshelf bookshelf : foundAuthorSymbols) {
             separatedAuthorSymbols.add(separateAuthorSymbol(bookshelf.getStartCallNumber().getAuthorSymbol()));
@@ -121,30 +117,30 @@ public class MainService {
     }
 
     /**
-     *  key < checkVal : false
-     *  key >= checkVal : true
+     *  key < checkVal : true  (예외 발생)
+     *  key >= checkVal : false
      *  
      * @param myKey
      * @param checkVal  : 기준 청구기호
      * @return
      */
     private static boolean checkExceptionCase(SeparatedAuthorSymbolDto myKey, SeparatedAuthorSymbolDto checkVal) {
-        boolean firstIsKorean;
+        boolean checkValIsKorean;
         boolean keyIsKorean;
         
         // 1차 비교
         if('A' <= myKey.getAuthorInitialConsonant() && myKey.getAuthorInitialConsonant() <= 'z') keyIsKorean = false;
         else keyIsKorean = true;
-        if('A' <= checkVal.getAuthorInitialConsonant() && checkVal.getAuthorInitialConsonant() <= 'z') firstIsKorean = false;
-        else firstIsKorean = true;
-        if(keyIsKorean && !firstIsKorean) {  // key < first
+        if('A' <= checkVal.getAuthorInitialConsonant() && checkVal.getAuthorInitialConsonant() <= 'z') checkValIsKorean = false;
+        else checkValIsKorean = true;
+        if(keyIsKorean && !checkValIsKorean) {  // key < checkVal
             return true;  // 무조건 예외임
-        } else if (!keyIsKorean && firstIsKorean) {  // key > first
+        } else if (!keyIsKorean && checkValIsKorean) {  // key > checkVal
             return false;  // 무조건 예외 아님
         } else {
-            if(myKey.getAuthorInitialConsonant() < checkVal.getAuthorInitialConsonant()) {  // key < first
+            if(myKey.getAuthorInitialConsonant() < checkVal.getAuthorInitialConsonant()) {  // key < checkVal
                 return true;
-            } else if (myKey.getAuthorInitialConsonant() > checkVal.getAuthorInitialConsonant()) {  // key > first
+            } else if (myKey.getAuthorInitialConsonant() > checkVal.getAuthorInitialConsonant()) {  // key > checkVal
                 return false;
             } else {
                 // 아무것도 하지 않고 넘김
@@ -152,7 +148,7 @@ public class MainService {
         }
         
         // 2차 비교
-        if(myKey.getNumber() < checkVal.getNumber()) {  // key < first
+        if(myKey.getNumber() < checkVal.getNumber()) {  // key < checkVal
             return true;
         } else if(myKey.getNumber() > checkVal.getNumber()) {
             return false;
@@ -161,21 +157,63 @@ public class MainService {
         }
 
         // 3차 비교
-        if('A' <= myKey.getBookInitialConsonant() && myKey.getBookInitialConsonant() <= 'z') keyIsKorean = false;
-        else keyIsKorean = true;
-        if('A' <= checkVal.getBookInitialConsonant() && checkVal.getBookInitialConsonant() <= 'z') firstIsKorean = false;
-        else firstIsKorean = true;
-        if(keyIsKorean && !firstIsKorean) {  // key < first
-            return true;
-        } else if (!keyIsKorean && firstIsKorean) {  // key > first
-            // 아무것도 하지 않고 넘김. 정반대인 대소관계를 처리하기 위해서는 이 else if 문이 기능은 없어도 반드시 있어야 함.
-        } else {
-            if(myKey.getBookInitialConsonant() < checkVal.getBookInitialConsonant()) {  // key < first
-                return true;
-            }
-        }
+        String keyBookInitial = myKey.getBookInitialConsonant();
+        String checkValBookInitial = checkVal.getBookInitialConsonant();
 
-        return false;
+        int ans = compareBookInit(keyBookInitial, checkValBookInitial);
+        if (ans == -1)
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     *  key < checkVal : -1
+     *  key = checkVal : 0
+     *  key > checkVal : 1
+     */
+    private static int compareBookInit(String keyBookInitial, String checkValBookInitial) {
+        boolean keyIsKorean;
+        boolean checkValIsKorean;
+        int i = 0;
+        boolean kIsNull = false;
+        boolean cIsNull = false;
+        Character k = null;
+        Character c = null;
+        while (true) {
+            try {
+                k = keyBookInitial.charAt(i);
+            } catch (StringIndexOutOfBoundsException e) {
+                kIsNull = true;
+            }
+            try {
+                c = checkValBookInitial.charAt(i);
+            } catch (StringIndexOutOfBoundsException e) {
+                cIsNull = true;
+            }
+            if(kIsNull & !cIsNull) // key < checkVal
+                return -1;
+            if(!kIsNull & cIsNull) // key > checkVal
+                return 1;
+            if(kIsNull & cIsNull)  // key == checkVal. 둘 다 더 이상 비교할 수 있는 것이 없으면, 탈출할 수 있게 해야 무한 루프 빠져나옴.
+                return 0;
+
+            if('A' <= k && k <= 'z') keyIsKorean = false;
+            else keyIsKorean = true;
+            if('A' <= c && c <= 'z') checkValIsKorean = false;
+            else checkValIsKorean = true;
+            if(keyIsKorean && !checkValIsKorean) {  // key < checkVal
+                return -1;
+            } else if (!keyIsKorean && checkValIsKorean) {  // key > checkVal
+                return 1;
+            } else {
+                if(k < c) {  // key < checkVal
+                    return -1;
+                }
+            }
+
+            i++;
+        }
     }
 
     private ColumnAddressResponseDto buildBookshelfAuthorSymbolToColumnAddressResponseDto(
@@ -197,13 +235,18 @@ public class MainService {
         int n = authorSymbol.length();
         Character c;
 
+        // 저자 초성을 파싱
         Character authorInit = authorSymbol.charAt(0);
-        Character bookInit = null;
 
         int i;  // for 문 내 변수들은 for문이 종료되면 소멸됨. 재활용하기 위해서 밖으로 꺼내 둠.
-        String num = "";  // null로 초기화하면, 문자열 합성 시 null이 들어가서 안됨
+        String num = "";  // 숫자 파싱. null로 초기화하면, 문자열 합성 시 null이 들어가서 안됨
+        String bookInit = "";  // 도서 초성 ㅍㅏ싱
         String temp;
-        for (i = 1; i < 4; i++) {
+        /**
+         *  숫자를 파싱 (최대 3자리)
+         *  책 제목 초성이 숫자로 시작하는 경우 구분할 수가 없음. 유저에게 경고하는 것이 최선.
+         */
+        for (i = 1; i < 4 ; i++) {
             c = authorSymbol.charAt(i);
             temp = c.toString();
             try {
@@ -213,8 +256,8 @@ public class MainService {
             }
             num = num + temp;
         }
-
-        bookInit = authorSymbol.charAt(i);
+        // 이후 도서초성 및 기타 등등을 한꺼번에 파싱
+        bookInit = authorSymbol.substring(i);
         
         // 저자기호가 전부 문자인 경우 예외처리
         try{
@@ -343,27 +386,7 @@ public class MainService {
         }
         
         // 3차 탐색 : 도서 초성
-        Character leftValBookInitialConsonant = leftVal.getBookInitialConsonant();
-        Character rightValBookInitialConsonant = rightVal.getBookInitialConsonant();
-
-        if('A' <= leftValBookInitialConsonant && leftValBookInitialConsonant <= 'z') leftIsKorean = false;
-        else leftIsKorean = true;
-        if('A' <= rightValBookInitialConsonant && rightValBookInitialConsonant <= 'z') rightIsKorean = false;
-        else rightIsKorean = true;
-
-        if(leftIsKorean && !rightIsKorean) {  // left < right
-            return -1;
-        } else if (!leftIsKorean && rightIsKorean) {  // left > right
-            return 1;
-        } else {
-            if(leftValBookInitialConsonant < rightValBookInitialConsonant) {
-                return -1;
-            } else if (leftValBookInitialConsonant > rightValBookInitialConsonant) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
+        return compareBookInit(leftVal.getBookInitialConsonant(), rightVal.getBookInitialConsonant());
     }
 
     /**
@@ -427,7 +450,8 @@ public class MainService {
                     lowIndex = midIndex + 1;
                 } else {
                     /**
-                     *  만약 저자 초성이 같은 경우에, 그 다음 숫자가 작아서 실제 키의 위치가 현재 column보다 앞에 있는 예외가 발생할 수 있다.
+                     *  현재 내 코드는 탐색의 효율을 높이기 위해 동일한 요소들에 대해서만 비교할 수 있도록 새 리스트를 구현하는 방식으로 되어 있다.
+                     *  하지만 만약 저자 초성이 같은 경우에, 그 다음 숫자가 작아서 실제 키의 위치가 현재 column보다 앞에 있는 예외가 발생할 수 있다.
                      *  따라서 현재 저자기호의 숫자와 key의 저자기호의 숫자를 서로 비교했을 때 key의 숫자가 더 작다면,
                      *  key는 반드시 현재 column의 바로 앞에 위치하는 것이 보장된다.
                      *
@@ -531,55 +555,42 @@ public class MainService {
         if(temp2.size() > 1) {
             lowIndex = 0;
             highIndex = temp2.size() - 1;
-            myKey = separatedKeyAuthorSymbol.getBookInitialConsonant();
+            String myKey3 = separatedKeyAuthorSymbol.getBookInitialConsonant();
+            String myMid3 = "";
             while (lowIndex <= highIndex) {
                 midIndex = (lowIndex + highIndex) / 2;
-                myMid = temp2.get(midIndex).getBookInitialConsonant();
+                myMid3 = temp2.get(midIndex).getBookInitialConsonant();
 
-                if('A' <= myKey && myKey <= 'z') keyIsKorean = false;
-                else keyIsKorean = true;
-                if('A' <= myMid && myMid <= 'z') midIsKorean = false;
-                else midIsKorean = true;
-                if(keyIsKorean && !midIsKorean) {  // key < mid
-                    highIndex = midIndex - 1;
-                } else if (!keyIsKorean && midIsKorean) {  // key > mid
-                    lowIndex = midIndex + 1;
-                }
+                // 여기서도 같은 이치로 예외처리가 들어가야 한다.
+                if (midIndex < temp2.size() - 1) {
+                    boolean nextOfMidIsKorean;
+                    String nextOfMid = separatedAuthorSymbols.get(midIndex + 1).getBookInitialConsonant();
 
-                else {
-                    if(myKey < myMid) {
-                        highIndex = midIndex - 1;
-                    } else if (myKey > myMid) {
-                        // 여기서도 같은 이치로 예외처리가 들어가야 한다.
-                        if(midIndex < temp2.size() - 1) {
-                            boolean nextOfMidIsKorean;
-                            Character nextOfMid = separatedAuthorSymbols.get(midIndex+1).getBookInitialConsonant();
-                            if('A'<=nextOfMid && nextOfMid <= 'z') nextOfMidIsKorean=false;
-                            else nextOfMidIsKorean=true;
-
-                            if(myKey < temp2.get(midIndex+1).getBookInitialConsonant() || (!nextOfMidIsKorean && keyIsKorean)) {  // key < nextOfMid
-                                SeparatedAuthorSymbolDto t = temp2.get(midIndex);
-                                String tempToString = t.getAuthorInitialConsonant() + t.getNumber().toString() + t.getBookInitialConsonant();
-                                ColumnAddressResponseDto ans = buildBookshelfAuthorSymbolToColumnAddressResponseDto(foundAuthorSymbols, tempToString);
-                                return ReturnAnswerDto.builder()
-                                        .answer(null)
-                                        .exceptionAnswer(ans)
-                                        .build();
-                            }
-                        }
-
-                        lowIndex = midIndex + 1;
-                    } else {
-                        break;
+                    if (compareBookInit(myKey3, myMid3) == -1) {  // key < nextOfMid
+                        SeparatedAuthorSymbolDto t = temp2.get(midIndex);
+                        String tempToString = t.getAuthorInitialConsonant() + t.getNumber().toString() + t.getBookInitialConsonant();
+                        ColumnAddressResponseDto ans = buildBookshelfAuthorSymbolToColumnAddressResponseDto(foundAuthorSymbols, tempToString);
+                        return ReturnAnswerDto.builder()
+                                .answer(null)
+                                .exceptionAnswer(ans)
+                                .build();
                     }
                 }
+
+                int ans = compareBookInit(myKey3, myMid3);
+                if(ans == -1)  // key < mid
+                    highIndex = midIndex - 1;
+                else if(ans == 1)  // key > mid
+                    lowIndex = midIndex + 1;
+                else  // key == mid
+                    break;
             }
         } else if(temp2.size() == 1) {
             midIndex = 0;
         } else{
             throw new EmptyStackException();
         }
-        Character setBookInit = temp2.get(midIndex).getBookInitialConsonant();
+        String setBookInit = temp2.get(midIndex).getBookInitialConsonant();
 
         // 최종적으로 결정된 조각들을 전부 조합. 한정된 리스트 내의 값들을 조합했기에, 예외만 터지지 않으면 반드시 일치하는 row가 존재하게 됨.
         String answer = setAuthorInit + String.valueOf(setNum) + setBookInit;
