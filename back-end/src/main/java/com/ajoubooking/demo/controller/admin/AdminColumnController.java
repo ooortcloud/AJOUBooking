@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.math.BigDecimal;
+
 @Controller
 @RequestMapping("/login")
 public class AdminColumnController {
@@ -52,7 +54,9 @@ public class AdminColumnController {
     public String selectColumn(Model model) {
         // model.addAttribute("columnDto", ChangeColumnDto.builder().build());
         Bookshelf tempPrevious = adminService.findPreviousBookshelfByCallNumber(inputCallNumber);
-        String previousCallNumber = tempPrevious.getStartCallNumber().getClassificationNumber() + " " + tempPrevious.getStartCallNumber().getAuthorSymbol();
+
+        BigDecimal getClassificationNum = tempPrevious.getStartCallNumber().getClassificationNumber().stripTrailingZeros();
+        String previousCallNumber = getClassificationNum + " " + tempPrevious.getStartCallNumber().getAuthorSymbol();
         model.addAttribute("previous", previousCallNumber);
         model.addAttribute("present", inputCallNumber);
 
