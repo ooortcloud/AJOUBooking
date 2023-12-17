@@ -2,7 +2,7 @@ package com.ajoubooking.demo.controller.admin;
 
 import com.ajoubooking.demo.domain.Bookshelf;
 import com.ajoubooking.demo.dto.admin.ChangeColumnDto;
-import com.ajoubooking.demo.dto.home.ColumnAddressDto;
+import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
 import com.ajoubooking.demo.service.AdminService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -52,22 +52,33 @@ public class AdminColumnController {
      */
     @GetMapping("/selectColumn")
     public String selectColumn(Model model) {
+        model.addAttribute("inputVal", inputCallNumber);  // 현재 입력한 청구기호
         // model.addAttribute("columnDto", ChangeColumnDto.builder().build());
-        Bookshelf tempPrevious = adminService.findPreviousBookshelfByCallNumber(inputCallNumber);
 
-        BigDecimal getClassificationNum = tempPrevious.getStartCallNumber().getClassificationNumber().stripTrailingZeros();
+        // 이전 column 시작 청구기호
+        Bookshelf tempPrevious = adminService.findPreviousBookshelfByCallNumber(inputCallNumber);
+        BigDecimal getClassificationNum = tempPrevious.getStartCallNumber().getClassificationNumber().stripTrailingZeros();  // 소수점 이하 불필요한 0들을 제거하기 표현하기 위함
         String previousCallNumber = getClassificationNum + " " + tempPrevious.getStartCallNumber().getAuthorSymbol();
         model.addAttribute("previous", previousCallNumber);
-        model.addAttribute("present", inputCallNumber);
 
-        Bookshelf tempNext = adminService.findNextBookshelfByColumnAddressDto(ColumnAddressDto.builder()
+        // 현재 column 시작 청구기호
+        Bookshelf tempPresent = adminService.findNextBookshelfByColumnAddressDto(ColumnAddressResponseDto.builder()
                 .category(tempPrevious.getColumnAddress().getCategory())
                 .bookshelfNum(tempPrevious.getColumnAddress().getBookshelfNum())
                 .columnNum(tempPrevious.getColumnAddress().getColumnNum())
                 .build());
-        String nextCallNumber = tempNext.getStartCallNumber().getClassificationNumber() + " " + tempNext.getStartCallNumber().getAuthorSymbol();
+        getClassificationNum = tempPresent.getStartCallNumber().getClassificationNumber().stripTrailingZeros();
+        String presentCallNumber = getClassificationNum + " " + tempPresent.getStartCallNumber().getAuthorSymbol();
+        model.addAttribute("present", presentCallNumber);
 
-
+        // 다음 column 시작 청구기호
+        Bookshelf tempNext = adminService.findNextBookshelfByColumnAddressDto(ColumnAddressResponseDto.builder()
+                .category(tempPresent.getColumnAddress().getCategory())
+                .bookshelfNum(tempPresent.getColumnAddress().getBookshelfNum())
+                .columnNum(tempPresent.getColumnAddress().getColumnNum())
+                .build());
+        getClassificationNum = tempNext.getStartCallNumber().getClassificationNumber().stripTrailingZeros();
+        String nextCallNumber = getClassificationNum + " " + tempNext.getStartCallNumber().getAuthorSymbol();
         model.addAttribute("next", nextCallNumber);
         return "/column/selectChangeColumn";
     }
@@ -80,7 +91,7 @@ public class AdminColumnController {
 
         Bookshelf temp = adminService.findPreviousBookshelfByCallNumber(columnDto.getInputCallNumber());
         try {
-            Bookshelf nextBookshelf = adminService.findNextBookshelfByColumnAddressDto(ColumnAddressDto.builder()
+            Bookshelf nextBookshelf = adminService.findNextBookshelfByColumnAddressDto(ColumnAddressResponseDto.builder()
                     .category(temp.getColumnAddress().getCategory())
                     .bookshelfNum(temp.getColumnAddress().getBookshelfNum())
                     .columnNum(temp.getColumnAddress().getColumnNum())

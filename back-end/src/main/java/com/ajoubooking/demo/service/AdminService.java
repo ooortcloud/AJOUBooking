@@ -3,8 +3,8 @@ package com.ajoubooking.demo.service;
 import com.ajoubooking.demo.domain.Bookshelf;
 import com.ajoubooking.demo.dto.admin.AdminDto;
 import com.ajoubooking.demo.dto.home.CallNumberDto;
-import com.ajoubooking.demo.dto.home.ColumnAddressDto;
-import com.ajoubooking.demo.repository.AdminRepository;
+import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
+import com.ajoubooking.demo.repository.admin.AdminRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,8 +40,7 @@ public class AdminService {
     }
 
     public Bookshelf findPreviousBookshelfByCallNumber(String callNumber) {
-        CallNumberDto temp = searchService.separateRequestCallNumber(callNumber);
-        return searchService.binarySearch(temp);
+        return searchService.findPreviousBookshelfByCallNumber(callNumber);
     }
 
     /**
@@ -51,32 +50,50 @@ public class AdminService {
      *  3. 없으면 본인이 해당 책장의 마지막 시작 청구기호가 되는 것이므로, 항상 다음 책장의 첫번째 시작 청구기호가 nextCallNumber가 됨.
      *      3-1. 골때리게 해당 책장이 해당 category의 마지막 bookshelfNum이었다면, 다음 category의 최초 시작 청구기호를 찾아야 함.
      */
-    public Bookshelf findNextBookshelfByColumnAddressDto(ColumnAddressDto previous) {
+    public Bookshelf findNextBookshelfByColumnAddressDto(ColumnAddressResponseDto previous) {
         Integer previousCategory = previous.getCategory();
         Integer previousBookshelfNum = previous.getBookshelfNum();
         Integer previousColumnNum = previous.getColumnNum();
-        Optional<Bookshelf> temp = searchService.findByColumnAddress(ColumnAddressDto.builder()
-                                                                                    .category(previousCategory)
-                                                                                    .bookshelfNum(previousBookshelfNum)
-                                                                                    .columnNum(previousColumnNum + 1)
-                                                                                    .build());
+        Bookshelf getBookshelf = searchService.findBookshelfByColumnAddress(ColumnAddressResponseDto.builder()
+                .category(previousCategory)
+                .bookshelfNum(previousBookshelfNum)
+                .columnNum(previousColumnNum + 1)
+                .build());
+        Optional<Bookshelf> temp;
+        if(getBookshelf==null)
+            temp = Optional.empty();
+        else
+            temp = Optional.of(getBookshelf);
 
-        // 해당 책장의 마지막 column이었을 경우  << 다음 책장의 첫번째 청구기호를 조회해야 함
+
+        // 해당 책장의 마지막 column이었을 경우 예외처리 << 다음 책장의 첫번째 청구기호를 조회해야 함
         if(temp.isEmpty()) {
-            Optional<Bookshelf> tempNextBookshelfNum = searchService.findByColumnAddress(ColumnAddressDto.builder()
+            Optional<Bookshelf> tempNextBookshelfNum;
+            Bookshelf getBookshelf2 = searchService.findBookshelfByColumnAddress(ColumnAddressResponseDto.builder()
                     .category(previousCategory)
                     .bookshelfNum(previousBookshelfNum + 1)
                     .columnNum(1)
                     .build());
+            if(getBookshelf2==null)
+                tempNextBookshelfNum = Optional.empty();
+            else
+                tempNextBookshelfNum = Optional.of(getBookshelf2);
 
-            // 해당 category의 마지막 책장의 마지막 column이었을 경우 << 다음 카테고리의 최초 청구기호를 조회해야 함
+
+            // 해당 category의 마지막 책장의 마지막 column이었을 경우 예외처리 << 다음 카테고리의 최초 청구기호를 조회해야 함
             if(tempNextBookshelfNum.isEmpty()) {
                 Integer nextCategory = searchService.findNextCategory(previousCategory);
-                Optional<Bookshelf> next = searchService.findByColumnAddress(ColumnAddressDto.builder()
-                                                                                            .category(nextCategory)
-                                                                                            .bookshelfNum(1)
-                                                                                            .columnNum(1)
-                                                                                            .build());
+                Optional<Bookshelf> next;
+                Bookshelf getBookshelf3 = searchService.findBookshelfByColumnAddress(ColumnAddressResponseDto.builder()
+                        .category(nextCategory)
+                        .bookshelfNum(1)
+                        .columnNum(1)
+                        .build());
+                if(getBookshelf3==null)
+                    next = Optional.empty();
+                else
+                    next = Optional.of(getBookshelf3);
+
 
                 // previous 책장이 해당 도서관의 마지막 category의 마지막 책장의 마지막 column이었을 때 예외처리
                 if(next.isEmpty()) {

@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 @Embeddable
 @Getter
 public class CallNumber {
-    @Column(name = "classification_number", precision = 9, scale = 6)  // decimal(precision, scale)로 생성됨
+    @Column(name = "classification_number", precision = 15, scale = 12)  // decimal(precision, scale)로 생성됨
     private BigDecimal classificationNumber;  // 분류번호 : 808.8
                     /*
                         Float은 '근사값'인 부동 소수점 형태로 데이터를 저장한다.

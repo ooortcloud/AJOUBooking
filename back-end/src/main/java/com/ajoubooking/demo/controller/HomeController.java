@@ -1,41 +1,43 @@
 package com.ajoubooking.demo.controller;
 
 import com.ajoubooking.demo.dto.home.CallNumberDto;
-import com.ajoubooking.demo.dto.home.ColumnAddressDto;
+import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
 import com.ajoubooking.demo.service.HomeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.Optional;
-
-// @CrossOrigin(origins = "http://localhost:3000/*")  // CORS 해결 어노테이션
+// @CrossOrigin(origins = "http://localhost:3000/*")  // CORS 해결 어노테이션  << config 클래스에서 공통처리시키도록 변경
 @RestController  // 자바 객체를 HttpResponse의 본문 내용과 매핑해줌
 class HomeController {
 
     @Autowired  // Spring이 해당 Bean 클래스에 대해서 자동 DI를 해준다.
     private HomeService homeService;
 
-    // POST로 값을 입력받으면 DB 데이터를 바탕으로 로직으로 처리해서 Front서버에 반환
+    // 값을 입력받으면 DB 데이터를 바탕으로 로직으로 처리해서 Front서버에 반환
     @GetMapping("")
-    public ResponseEntity<ColumnAddressDto> response(@RequestParam(value = "callNumber") String callNumber) {
-        Optional<ColumnAddressDto> responseDto;
+    public ResponseEntity<ColumnAddressResponseDto> response(@RequestParam(value = "callNumber") String callNumber) {
+        // 예외를 컨트롤러 밖으로 던지기 위해 일부로 예외처리 안함
+        /*
         try {
-            CallNumberDto requestedCallNumber = homeService.separateRequestCallNumber(callNumber);
-            responseDto = homeService.binarySearchForResponse(requestedCallNumber);
+
         } catch (Exception e) {
             System.out.println(LocalDate.now() + " >> " +  e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
-        if(responseDto.isPresent())
-            return ResponseEntity.ok(responseDto.get());
+         */
+        CallNumberDto requestedCallNumber = homeService.separateRequestCallNumber(callNumber);
+        ColumnAddressResponseDto responseDto = homeService.binarySearchForResponse(requestedCallNumber);
+        return ResponseEntity.ok(responseDto);
+        
+        /* 마지막에서 절대 예외가 발생할 수가 없다. 앞에서 예외처리 다 해뒀기 때문.
         else{
             System.out.println("내부 이진 탐색 연산이 잘못됨...");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+         */
     }
 
     @GetMapping("/health")

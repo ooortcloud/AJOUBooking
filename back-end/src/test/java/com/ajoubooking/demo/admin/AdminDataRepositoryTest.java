@@ -2,7 +2,7 @@ package com.ajoubooking.demo.admin;
 
 import com.ajoubooking.demo.domain.Admin;
 import com.ajoubooking.demo.dto.admin.AdminDto;
-import com.ajoubooking.demo.repository.AdminDataRepository;
+import com.ajoubooking.demo.repository.admin.AdminDataRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
