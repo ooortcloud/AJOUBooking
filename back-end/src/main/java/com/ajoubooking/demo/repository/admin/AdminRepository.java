@@ -20,6 +20,9 @@ public class AdminRepository {
 
     public AdminDto findByPw(String pw) {
         Admin temp = dataRepository.findByPw(pw);
+        // 비밀번호가 옳지 않은 경우 예외처리
+        if(temp == null)
+            return null;
         return AdminDto.builder().pw(temp.getPw()).build();
     }
 

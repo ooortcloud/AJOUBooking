@@ -145,6 +145,10 @@ public class SearchService {
             // 이전 bookshelf의 가장 마지막 columnNum이 무엇인지 알아야 함
             // 150:1:1 의 경우에는 이전 컬럼이 120:8:12와 같은 예외가 발생함
             if(columnAddressResponseDto.getBookshelfNum() == 1) {
+                // 최초의 경우에는 이전 colmn이 존재하지 않음.
+                if(columnAddressResponseDto.getCategory() == 0) {
+                    return null;
+                }
                 temp = ColumnAddressResponseDto.builder()
                         .category(columnAddressResponseDto.getCategory())
                         .bookshelfNum(null)

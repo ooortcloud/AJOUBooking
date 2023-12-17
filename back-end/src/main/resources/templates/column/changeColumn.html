@@ -171,7 +171,7 @@
 
     <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
       <h2>Column 시작 청구기호 변경</h2>
-      <p class="fs-5 text-body-primary">하단 입력 박스에 현재 적용하고자 하는 청구기호를 입력해주세요.</p>
+      <p class="fs-5 text-body-primary">하단 입력 박스에 현재 변경하고자 하는 청구기호를 입력해주세요.</p>
     </div>
   </header>
 
@@ -181,11 +181,11 @@
         <div class="col mx-auto">
           <div class="card mb-4 rounded-3 shadow-sm">
             <div class="card-header py-3">
-              <h4 class="my-0 fw-normal">적용할 값</h4>
+              <h4 class="my-0 fw-normal">변경할 값</h4>
             </div>
             <div class="card-body">
-              <label for="inputCallNumber" class="form-label">적용할 청구기호</label>
-              <input type="text" class="form-control" id="inputCallNumber" th:field="*{inputCallNumber}" placeholder="적용할 청구기호를 입력">
+              <label for="inputCallNumber" class="form-label">변경할 청구기호</label>
+              <input type="text" class="form-control" id="inputCallNumber" th:field="*{inputCallNumber}" placeholder="변경할 청구기호를 입력">
               <p th:if="${#fields.hasErrors('inputCallNumber')}" th:errors="*{inputCallNumber}" th:class="my-error">field error</p>
               <button type="submit" class="w-100 btn btn-lg btn-primary mt-4">입력</button>
             </div>

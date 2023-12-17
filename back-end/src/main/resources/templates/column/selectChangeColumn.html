@@ -171,48 +171,49 @@
 
     <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
       <h2>Column 시작 청구기호 변경</h2>
-      <p class="fs-5 text-body-primary">변경하고자 하는 청구기호를 선택해주세요.</p>
+      <p class="fs-5 text-body-primary">변경될 청구기호를 확인해주세요.</p>
+      <p class="fs-5 text-body-secondary">⚠️주의: 변경할 청구기호는 반드시 이전 청구기호보다 크고 다음 청구기호보다 작아야 합니다.</p>
       <p class="fs-5 text-body-secondary">⚠️주의: 선택 후 되돌릴 수 없습니다.</p>
-      <p class="fs-5 text-body-primary font-size-4rem" th:text="|현재 입력한 청구기호 : '${inputVal}'|">현재 입력한 청구기호</p>
+      <p class="fs-5 text-body-primary font-size-4rem" th:text="|앞에서 입력한 청구기호 : '${inputVal}'|">앞에서 입력한 청구기호</p>
     </div>
   </header>
 
   <main>
-    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
-      <div class="col">
-        <div class="card mb-4 rounded-3 shadow-sm border-primary">
-          <div class="card-header py-3 text-bg-primary border-primary">
-            <h4 class="my-0 fw-normal">이전 column 시작 청구기호</h4>
+    <form th:action th:object="${columnDto}" method="post">
+      <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+        <div class="col">
+          <div class="card mb-4 rounded-3 shadow-sm border-primary">
+            <div class="card-header py-3 text-bg-primary border-primary">
+              <h4 class="my-0 fw-normal">이전 column 시작 청구기호</h4>
+            </div>
+            <div class="card-body mb-4">
+              <h2 class="card-title pricing-card-title" th:text="${previous}"></h2>
+            </div>
           </div>
-          <div class="card-body mb-4">
-            <h2 class="card-title pricing-card-title" th:text="${previous}"></h2>
-            <button type="button" class="w-100 btn btn-lg btn-primary">여기에 적용</button>
+        </div>
+        <div class="col">
+          <div class="card mb-4 rounded-3 shadow-sm border-primary">
+            <div class="card-header py-3 text-bg-primary border-primary">
+              <h4 class="my-0 fw-normal">현재 column 시작 청구기호</h4>
+            </div>
+            <div class="card-body mb-4">
+              <h2 class="card-title pricing-card-title" th:text="${present}"></h2>
+              <button type="button" class="w-100 btn btn-lg btn-primary">현재값을 입력값으로 변경하기</button>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card mb-4 rounded-3 shadow-sm border-primary">
+            <div class="card-header py-3 text-bg-primary border-primary">
+              <h4 class="my-0 fw-normal">다음 column 시작 청구기호</h4>
+            </div>
+            <div class="card-body mb-4">
+              <h2 class="card-title pricing-card-title" th:text="${next}"></h2>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col">
-        <div class="card mb-4 rounded-3 shadow-sm border-primary">
-          <div class="card-header py-3 text-bg-primary border-primary">
-            <h4 class="my-0 fw-normal">현재 column 시작 청구기호</h4>
-          </div>
-          <div class="card-body mb-4">
-            <h2 class="card-title pricing-card-title" th:text="${present}"></h2>
-            <button type="button" class="w-100 btn btn-lg btn-primary">여기에 적용</button>
-          </div>
-        </div>
-      </div>
-      <div class="col">
-        <div class="card mb-4 rounded-3 shadow-sm border-primary">
-          <div class="card-header py-3 text-bg-primary border-primary">
-            <h4 class="my-0 fw-normal">다음 column 시작 청구기호</h4>
-          </div>
-          <div class="card-body mb-4">
-            <h2 class="card-title pricing-card-title" th:text="${next}"></h2>
-            <button type="button" class="w-100 btn btn-lg btn-primary">여기에 적용</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    </form>
   </main>
 
   <footer class="pt-4 my-md-5 pt-md-5 border-top">
