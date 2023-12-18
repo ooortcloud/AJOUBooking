@@ -1,17 +1,16 @@
 package com.ajoubooking.demo.controller.admin;
 
 import com.ajoubooking.demo.domain.Bookshelf;
+import com.ajoubooking.demo.dto.admin.ButtonDto;
 import com.ajoubooking.demo.dto.admin.ChangeColumnDto;
+import com.ajoubooking.demo.dto.home.CallNumberDto;
 import com.ajoubooking.demo.dto.home.ColumnAddressResponseDto;
 import com.ajoubooking.demo.service.AdminService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
@@ -97,31 +96,32 @@ public class AdminColumnController {
         return "/column/selectChangeColumn";
     }
 
-    @PostMapping("/selectColumn")
-    public String selectColumnPost(@Valid @ModelAttribute("columnDto") ChangeColumnDto columnDto, BindingResult bindingResult) {
-
-        // 생각해보니 매번 조회할 때마다 새로운 이전 이후 column을 조회하기 때문에 범위를 넘는 에러가 발생할 일이 없다.
-
-        /*
-        if(bindingResult.hasErrors()) {
-            return "/column/selectChangeColumn";
-        }
-
-        Bookshelf temp = adminService.findPreviousBookshelfByCallNumber(columnDto.getInputCallNumber());
-        try {
-            Bookshelf nextBookshelf = adminService.findNextBookshelfByColumnAddressDto(ColumnAddressResponseDto.builder()
-                    .category(temp.getColumnAddress().getCategory())
-                    .bookshelfNum(temp.getColumnAddress().getBookshelfNum())
-                    .columnNum(temp.getColumnAddress().getColumnNum())
-                    .build());
-        } catch (IndexOutOfBoundsException e) {
-            // MVC 모델에서 어떻게 상태코드를 설정하고 에러 메세지를 전송하지??
-            return "";
-        }
-
+    @GetMapping(value = "/selectColumn/test")
+    public String selectColumnPostTest(@RequestParam("buttonId") String buttonId) {
+        /**
+         *  누른 버튼에 따라 변경할 column을 바꿔줘야 함.  << javascript 상에서 버튼 id를 구분하여 ajax로 비동기통신을 해서 api 요청 처리를 해야 함...
+         *  크기 비교해서 예외처리 해야 함  << 이거도 javascript 상에서 분기문 걸어서 처리해야 할듯... (alert 함수로 예외처리하자.)
          */
+        if(buttonId.equals("nextcol")) {  // "다음" 쪽 버튼이 눌린 경우
+            // 예외처리 메소드
 
-        return "/column/selectChangeColumn";
+            CallNumberDto nextCallNumberDto = adminService.separateRequestCallNumber(nextCallNumber);
+            CallNumberDto inputCallNumberDto = adminService.separateRequestCallNumber(inputCallNumber);
+            adminService.updateCallNumber(nextCallNumberDto, inputCallNumberDto);
+        } else if(buttonId.equals("precol")) {  // "현재" 쪽 버튼이 눌린 겨우
+            CallNumberDto presentCallNumberDto = adminService.separateRequestCallNumber(presentCallNumber);
+            CallNumberDto inputCallNumberDto = adminService.separateRequestCallNumber(inputCallNumber);
+            adminService.updateCallNumber(presentCallNumberDto, inputCallNumberDto);
+        }
+
+
+        return "/column/successChangeColumn";
     }
 
+
+
+
+    // 신규 bookshelf를 추가하는 api
+
+    // 기존 bookshelf를 제거하는 api
 }

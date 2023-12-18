@@ -2,6 +2,7 @@ package com.ajoubooking.demo.repository.admin;
 
 import com.ajoubooking.demo.domain.Admin;
 import com.ajoubooking.demo.dto.admin.AdminDto;
+import com.ajoubooking.demo.dto.home.CallNumberDto;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -30,4 +31,7 @@ public class AdminRepository {
         queryRepository.updatePw(newPw);
     }
 
+    public void updateCallNumber(CallNumberDto presentCallNumberDto, CallNumberDto inputCallNumberDto) {
+        queryRepository.updateCallNumber(presentCallNumberDto, inputCallNumberDto);
+    }
 }

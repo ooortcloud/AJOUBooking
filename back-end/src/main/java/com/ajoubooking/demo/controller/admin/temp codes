@@ -1,0 +1,30 @@
+    1) 코드 1호 : ajax를 이용해서 내 백 서버에 버튼의 종류를 알림
+    /**
+     *
+     * @param a : JSON으로 전달받은 값. javascript 상에서 분기문 처리가 되었음을 믿고 주어진 값(선택된 CallNumber, inputCallNumber)을 이용해 DB 값 update
+     * @return
+     */
+    @PostMapping(value = "/selectColumn", consumes = "application/json")
+    public String selectColumnPost(@RequestBody ButtonDto dto) {
+        /**
+         *  누른 버튼에 따라 변경할 column을 바꿔줘야 함.  << javascript 상에서 버튼 id를 구분하여 ajax로 비동기통신을 해서 api 요청 처리를 해야 함...
+         *  크기 비교해서 예외처리 해야 함  << 이거도 javascript 상에서 분기문 걸어서 처리해야 할듯... (alert 함수로 예외처리하자.)
+         */
+        if(dto.getButtonId().equals("nextcol")) {  // "다음" 쪽 버튼이 눌린 경우
+            // 예외처리 메소드
+
+            CallNumberDto nextCallNumberDto = adminService.separateRequestCallNumber(nextCallNumber);
+            CallNumberDto inputCallNumberDto = adminService.separateRequestCallNumber(inputCallNumber);
+            adminService.updateCallNumber(nextCallNumberDto, inputCallNumberDto);
+        } else if(dto.getButtonId().equals("precol")) {  // "현재" 쪽 버튼이 눌린 겨우
+            CallNumberDto presentCallNumberDto = adminService.separateRequestCallNumber(presentCallNumber);
+            CallNumberDto inputCallNumberDto = adminService.separateRequestCallNumber(inputCallNumber);
+            adminService.updateCallNumber(presentCallNumberDto, inputCallNumberDto);
+        }
+
+
+        return "/column/successChangeColumn";
+    }
+
+
+//========================================================================================================================

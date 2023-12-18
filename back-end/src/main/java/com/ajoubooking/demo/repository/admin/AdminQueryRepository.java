@@ -1,12 +1,13 @@
 package com.ajoubooking.demo.repository.admin;
 
-import com.ajoubooking.demo.domain.QAdmin;
+import com.ajoubooking.demo.dto.home.CallNumberDto;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.ajoubooking.demo.domain.QAdmin.admin;
+import static com.ajoubooking.demo.domain.QBookshelf.bookshelf;
 
 @Repository
 @Transactional
@@ -30,5 +31,14 @@ public class AdminQueryRepository {
         em.flush();
         em.clear();
          */
+    }
+
+    public void updateCallNumber(CallNumberDto presentCallNumberDto, CallNumberDto inputCallNumberDto) {
+        queryFactory.update(bookshelf)
+                .set(bookshelf.startCallNumber.classificationNumber, inputCallNumberDto.getClassificationNumber())
+                .set(bookshelf.startCallNumber.authorSymbol, inputCallNumberDto.getAuthorSymbol())
+                .where(bookshelf.startCallNumber.classificationNumber.eq(presentCallNumberDto.getClassificationNumber())
+                        .and(bookshelf.startCallNumber.authorSymbol.eq(presentCallNumberDto.getAuthorSymbol())))
+                .execute();
     }
 }

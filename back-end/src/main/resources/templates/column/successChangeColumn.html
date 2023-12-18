@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-bs-theme="auto" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" class="h-100" data-bs-theme="auto">
   <head><script src="../assets/js/color-modes.js"></script>
 
     <meta charset="utf-8">
@@ -9,7 +9,7 @@
     <meta name="generator" content="Hugo 0.118.2">
     <title>AJOU Booking</title>
 
-    <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/pricing/">
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/sticky-footer/">
 
     
 
@@ -98,9 +98,9 @@
 
     
     <!-- Custom styles for this template -->
-    <link href="pricing.css" rel="stylesheet">
+    <link href="sticky-footer.css" rel="stylesheet">
   </head>
-  <body>
+  <body class="d-flex flex-column h-100">
     <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
       <symbol id="check2" viewBox="0 0 16 16">
         <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
@@ -153,86 +153,17 @@
     </div>
 
     
-<svg xmlns="http://www.w3.org/2000/svg" class="d-none">
-  <symbol id="check" viewBox="0 0 16 16">
-    <title>Check</title>
-    <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
-  </symbol>
-</svg>
+<!-- Begin page content -->
+<main class="flex-shrink-0">
+  <div class="container">
+    <h1 class="mt-5">column 기준 청구기호 변경 성공</h1>
+    <p>👉🏼👉🏼 <a href="/login/main">이 링크를 누르면 메인 화면으로 돌아갑니다.</a> 👈🏼👈🏼</p>
+  </div>
+</main>
 
-<div class="container py-3">
-  <header>
-    <div class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
-      <a href="/login/main" class="d-flex align-items-center link-body-emphasis text-decoration-none">
-        <!-- /*<svg xmlns="http://www.w3.org/2000/svg" width="40" height="32" class="me-2" viewBox="0 0 118 94" role="img"><title>Bootstrap</title><path fill-rule="evenodd" clip-rule="evenodd" d="M24.509 0c-6.733 0-11.715 5.893-11.492 12.284.214 6.14-.064 14.092-2.066 20.577C8.943 39.365 5.547 43.485 0 44.014v5.972c5.547.529 8.943 4.649 10.951 11.153 2.002 6.485 2.28 14.437 2.066 20.577C12.794 88.106 17.776 94 24.51 94H93.5c6.733 0 11.714-5.893 11.491-12.284-.214-6.14.064-14.092 2.066-20.577 2.009-6.504 5.396-10.624 10.943-11.153v-5.972c-5.547-.529-8.934-4.649-10.943-11.153-2.002-6.484-2.28-14.437-2.066-20.577C105.214 5.894 100.233 0 93.5 0H24.508zM80 57.863C80 66.663 73.436 72 62.543 72H44a2 2 0 01-2-2V24a2 2 0 012-2h18.437c9.083 0 15.044 4.92 15.044 12.474 0 5.302-4.01 10.049-9.119 10.88v.277C75.317 46.394 80 51.21 80 57.863zM60.521 28.34H49.948v14.934h8.905c6.884 0 10.68-2.772 10.68-7.727 0-4.643-3.264-7.207-9.012-7.207zM49.948 49.2v16.458H60.91c7.167 0 10.964-2.876 10.964-8.281 0-5.406-3.903-8.178-11.425-8.178H49.948z" fill="currentColor"></path></svg> */ -->
-        <span class="fs-4">AJOU Booking</span>
-      </a>
-    </div>
-
-    <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
-      <h2>Column 시작 청구기호 변경</h2>
-      <p class="fs-5 text-body-primary">변경될 청구기호를 확인해주세요.</p>
-      <p class="fs-5 text-body-secondary">⚠️주의: 변경할 청구기호는 반드시 이전 청구기호보다 크고 다음 청구기호보다 작아야 합니다.</p>
-      <p class="fs-5 text-body-secondary">⚠️주의: 선택 후 되돌릴 수 없습니다.</p>
-    </div>
-  </header>
-
-  <main>
-    <form th:action method="post">
-      <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
-        <div class="col">
-          <div class="card mb-4 rounded-3 shadow-sm border-primary">
-            <div class="card-header py-3 text-bg-primary border-primary">
-              <h4 class="my-0 fw-normal">현재 column 시작 청구기호</h4>
-            </div>
-            <div class="card-body mb-4">
-              <h2 class="card-title pricing-card-title" th:text="${present}"></h2>
-              <button id="precol" type="button" class="w-100 btn btn-lg btn-primary" th:onclick="update('precol')">변경</button>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card mb-4 rounded-3 shadow-sm border-primary">
-            <div class="card-header py-3 text-bg-primary border-primary">
-              <h4 class="my-0 fw-normal">앞에서 입력한 청구기호</h4>
-            </div>
-            <div class="card-body mb-4">
-              <h2 class="card-title pricing-card-title" th:text="${inputVal}"></h2>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card mb-4 rounded-3 shadow-sm border-primary">
-            <div class="card-header py-3 text-bg-primary border-primary">
-              <h4 class="my-0 fw-normal">다음 column 시작 청구기호</h4>
-            </div>
-            <div class="card-body mb-4">
-              <h2 class="card-title pricing-card-title" th:text="${next}"></h2>
-              <button id="nextcol" type="button" class="w-100 btn btn-lg btn-primary" th:onclick="update('nextcol')">변경</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </form>
-  </main>
-
-  <footer class="pt-4 my-md-5 pt-md-5 border-top">
-    <div class="row">
-      <div class="col-12 col-md">
-        <!-- /* <img class="mb-2" src="../assets/brand/bootstrap-logo.svg" alt="" width="24" height="19"> */ -->
-        <small class="d-block mb-3 text-body-secondary">&copy; 2023</small>
-      </div>
-    </div>
-  </footer>
-</div>
+<footer class="footer mt-auto py-3 bg-body-tertiary">
+</footer>
 <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
-<!-- /* location.href를 활용하여 버튼을 누르면 주소가 변경되도록 함 */ -->
-<script>
-  function update(data){
-	if(confirm("정말 변경하시겠습니까?")){
-	  location.href = './selectColumn/test?buttonId=' + data;
-	}
-}
-</script>
+
     </body>
 </html>

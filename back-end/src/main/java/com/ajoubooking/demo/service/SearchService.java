@@ -604,6 +604,7 @@ public class SearchService {
         Integer setNum = temp.get(midIndex).getNumber();
 
         // 3차 : 책 제목 초성에 대해 이진탐색
+        String setBookInit = null;
         List<SeparatedAuthorSymbolDto> temp2 = new ArrayList<>();
         for (SeparatedAuthorSymbolDto authorSymbol : temp) {
             if(authorSymbol.getNumber() == setNum)
@@ -614,10 +615,35 @@ public class SearchService {
             lowIndex = 0;
             highIndex = temp2.size() - 1;
             String myKey3 = separatedKeyAuthorSymbol.getBookInitialConsonant();
+            boolean keyIsNull;
+            // 도서 초성이 없는 경우 예외처리
+            if(myKey3 == null)
+                keyIsNull = true;
+            else
+                keyIsNull = false;
+
             String myMid3 = "";
+            boolean midIsNull;
             while (lowIndex <= highIndex) {
                 midIndex = (lowIndex + highIndex) / 2;
                 myMid3 = temp2.get(midIndex).getBookInitialConsonant();
+                if(myMid3 == null)
+                    midIsNull = true;
+                else
+                    midIsNull = false;
+
+                if(!keyIsNull & midIsNull) {  // key < mid
+                    highIndex = midIndex - 1;
+                    continue;
+                } else if(keyIsNull & !midIsNull) {  // key > mid
+                    lowIndex = midIndex + 1;
+                    continue;
+                } else if(keyIsNull & midIsNull) {  // key == mid (null)
+                    setBookInit = "";
+                    break;
+                } else {
+                    // 아무것도 하지 않음
+                }
 
                 // 여기서도 같은 이치로 예외처리가 들어가야 한다.
                 if (midIndex < temp2.size() - 1) {
@@ -648,7 +674,9 @@ public class SearchService {
         } else{
             throw new EmptyStackException();
         }
-        String setBookInit = temp2.get(midIndex).getBookInitialConsonant();
+
+        if(setBookInit != "")
+            setBookInit = temp2.get(midIndex).getBookInitialConsonant();
 
         // 최종적으로 결정된 조각들을 전부 조합. 한정된 리스트 내의 값들을 조합했기에, 예외만 터지지 않으면 반드시 일치하는 row가 존재하게 됨.
         String answer = setAuthorInit + String.valueOf(setNum) + setBookInit;
